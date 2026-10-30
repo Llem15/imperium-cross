@@ -10,12 +10,24 @@
   --color-brand-surface: #fff6ed;
   --color-rating: #ffb71a;
   --color-footer-muted: #d0d0d0;
+  --color-dashboard-canvas: #ededed;
+  --color-dashboard-line: #e3e3e3;
+  --color-status-success: #2e9452;
+  --color-status-success-surface: #a1ddb6;
+  --color-status-pending: #f4a600;
+  --color-status-pending-surface: #fae1af;
+  --color-status-info: #185ba8;
+  --color-status-info-surface: #d3e6f9;
+  --color-routine-surface: #f3c6c4;
 
   --radius-card: 30px;
   --radius-panel: 20px;
   --radius-media: 10px;
   --radius-control: 5px;
   --radius-dialog: 15px;
+  --radius-statistic: 14px;
+  --spacing-sidebar: 233px;
+  --spacing-dashboard-header: 121px;
 
   --container-content: 1135px;
   --container-benefits: 1096px;
