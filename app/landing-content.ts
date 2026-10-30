@@ -33,11 +33,6 @@ export const navigation = [
   ["Testimonios", "testimonios"],
 ] as const;
 
-export function getPlanContactUrl(planName: (typeof plans)[number]["name"]) {
-  const message = `Hola, quisiera información sobre el Plan ${planName}. Consulta desde un proyecto de demostración; no es una contratación.`;
-  return `${gym.whatsappUrl}?text=${encodeURIComponent(message)}`;
-}
-
 export const benefits = [
   { title: "Equipamiento", description: "Máquinas y espacios preparados para diferentes tipos de entrenamiento.", image: "benefit-equipment" },
   { title: "Entrenadores", description: "Acompañamiento para mejorar tu entrenamiento.", image: "benefit-coaches" },
@@ -46,9 +41,9 @@ export const benefits = [
 ] as const;
 
 export const plans = [
-  { name: "Básico", price: "39.99", features: ["Acceso al gimnasio", "Consulta de rutinas", "Seguimiento de entrenamiento"] },
-  { name: "Premium", price: "69.99", features: ["Acceso al gimnasio.", "Rutinas personalizadas", "Seguimiento de progreso", "10% de descuento en nuestros productos", "Calculadora nutricional"] },
-  { name: "Pro", price: "99.99", features: ["Acceso al gimnasio.", "Rutinas personalizadas", "Seguimiento de progreso", "25% de descuento en nuestros productos", "Camiseta exclusiva + Estacionamiento free", "Calculadora nutricional"] },
+  { id: "basico", name: "Básico", price: "39.99", features: ["Acceso al gimnasio", "Consulta de rutinas", "Seguimiento de entrenamiento"] },
+  { id: "premium", name: "Premium", price: "69.99", features: ["Acceso al gimnasio.", "Rutinas personalizadas", "Seguimiento de progreso", "10% de descuento en nuestros productos", "Calculadora nutricional"] },
+  { id: "pro", name: "Pro", price: "99.99", features: ["Acceso al gimnasio.", "Rutinas personalizadas", "Seguimiento de progreso", "25% de descuento en nuestros productos", "Camiseta exclusiva + Estacionamiento free", "Calculadora nutricional"] },
 ] as const;
 
 export const facilities = [

@@ -20,9 +20,9 @@ Los enlaces de teléfono, correo y WhatsApp utilizan protocolos válidos. Son ac
 
 ## Planes, formularios y redes
 
-«Elegir plan» abre WhatsApp con el nombre del plan en una consulta editable, identificada como demostración. No crea socios, reservas, pagos ni suscripciones.
+«Elegir plan» inicia la [inscripción en dos pasos](membership-registration.md) conservando el plan elegido. No redirige a WhatsApp ni crea socios, reservas, pagos o suscripciones reales.
 
-Figma incluye formularios separados de datos y pago. No se publica un formulario sin receptor real ni se simula un envío exitoso. El registro, la validación en servidor, la persistencia y los pagos requieren una tarea posterior con backend; se utiliza la alternativa de consulta por contacto autorizada para esta landing.
+Los formularios de datos y selección de plan/método de pago de Figma funcionan como interfaz local. No se simula un envío exitoso: el último paso comunica que registro y pagos aún no están disponibles. La validación en servidor, persistencia y confirmación de pagos requieren una tarea posterior con backend.
 
 TikTok utiliza el perfil enlazado en el Linktree de referencia. Facebook e Instagram conservan sus iconos con estado «enlace pendiente», sin enlaces falsos ni controles inactivos que aparenten funcionar. No se verificaron URLs oficiales para esas redes.
 

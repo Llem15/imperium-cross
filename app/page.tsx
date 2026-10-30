@@ -1,8 +1,9 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { benefits, coaches, facilities, getPlanContactUrl, navigation, plans, testimonials } from "./landing-content";
+import { benefits, coaches, facilities, navigation, testimonials } from "./landing-content";
 import { ContactDetails, LocationMap, SocialLinks } from "./landing-contact";
 import { MobileNavigation } from "./landing-navigation";
+import { PlanRegistration } from "./inscripcion/registration-dialog";
 
 function Photo({ name, alt = "", cropStyle, preload = false }: {
   name: string;
@@ -58,13 +59,7 @@ export default function Home() {
 
         <section className="plans-section landing-section" id="planes" aria-labelledby="plans-title">
           <h2 id="plans-title">NUESTROS PLANES</h2>
-          <div className="plans-grid">
-            {plans.map((plan) => <article key={plan.name} className={`plan-card ${plan.name === "Premium" ? "plan-featured" : ""}`}>
-              <h3>Plan {plan.name}</h3><p className="plan-price">S/. {plan.price}<span>Mensual</span></p>
-              <ul>{plan.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
-              <a className="landing-button" href={getPlanContactUrl(plan.name)} target="_blank" rel="noopener noreferrer" aria-label={`Consultar Plan ${plan.name} por WhatsApp (demostración, abre otra pestaña)`}>Elegir plan</a>
-            </article>)}
-          </div>
+          <PlanRegistration />
         </section>
 
         <section className="facilities-section landing-section" aria-labelledby="facilities-title">

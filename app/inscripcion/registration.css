@@ -1,0 +1,63 @@
+.registration-dialog { position: fixed; margin: auto; width: min(413px,calc(100% - 24px)); max-width: none; max-height: calc(100dvh - 32px); padding: 0; border: 0; background: transparent; overflow: auto; overscroll-behavior: contain; }
+.registration-dialog::backdrop { background: rgb(0 0 0 / 55%); }
+.registration-close { position: absolute; z-index: 1; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; color: #a81e18; background: white; font-size: 24px; line-height: 1; cursor: pointer; }
+.registration-close:hover { background: #fff6ed; }
+.registration-card { width: min(413px,100%); min-height: 712px; border: 1px solid #0f0f0f; border-radius: 15px; background: #fff; padding: 46px; color: #0f0f0f; }
+.registration-heading { display: flex; flex-direction: column; align-items: center; gap: 15px; text-align: center; }
+.registration-heading p { color: #6b6b6b; font-size: 14px; }
+.registration-heading h1 { font-size: 24px; font-weight: 700; }
+.registration-heading h1:focus { outline: none; }
+.registration-form { margin-top: 50px; display: flex; flex-direction: column; min-height: 490px; }
+.registration-fields { display: flex; flex-direction: column; gap: 15px; }
+.registration-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; }
+.registration-field { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.registration-field label, .registration-payment legend { font-size: 16px; font-weight: 700; }
+.registration-field label > span, .registration-payment legend > span { color: #db140d; }
+.registration-field input, .registration-field select { width: 100%; min-width: 0; min-height: 40px; border: 1px solid #6b6b6b; border-radius: 5px; padding: 10px 15px; font-size: 14px; background: white; }
+.registration-field input::placeholder { color: #6b6b6b; opacity: 1; }
+.registration-field [aria-invalid=true] { border-color: #a81e18; }
+.registration-field select { padding-right: 8px; }
+.registration-actions { margin-top: auto; padding-top: 30px; display: flex; justify-content: space-between; gap: 20px; }
+.registration-next { justify-content: flex-end; }
+.registration-primary, .registration-back { width: 140px; min-height: 40px; border-radius: 30px; font-weight: 700; padding: 10px; cursor: pointer; font-size: 16px; }
+.registration-primary { background: linear-gradient(90deg,#a81e18,#db140d); color: white; }
+.registration-back { border: 1px solid #a81e18; color: #a81e18; background: white; }
+.registration-primary:hover, .registration-back:hover { filter: brightness(.94); }
+.registration-payment { border: 0; min-width: 0; }
+.registration-payment legend { margin-bottom: 10px; }
+.registration-payment-option { position: relative; display: flex; align-items: center; gap: 10px; border: 1px solid #6b6b6b; border-radius: 5px; padding: 10px 15px; cursor: pointer; min-height: 54px; }
+.registration-payment-option + .registration-payment-option { margin-top: 10px; }
+.registration-payment-option > input { position: absolute; opacity: 0; width: 15px; height: 15px; left: 15px; }
+.registration-payment-option:focus-within { outline: 3px solid #a81e18; outline-offset: 3px; }
+.registration-payment-option > img { flex-shrink: 0; }
+.payment-label, .payment-description { display: block; }
+.payment-label { font-size: 14px; font-weight: 500; }
+.payment-description { font-size: 12px; color: #6b6b6b; }
+.registration-error { color: #a81e18; font-size: 13px; }
+.registration-availability, .registration-notice { font-size: 13px; line-height: 1.4; }
+.registration-availability { color: #6b6b6b; }
+.registration-notice:not(:empty) { border-left: 3px solid #a81e18; padding: 10px; background: #fff6ed; }
+.registration-notice:empty { display: none; }
+.registration-confirmation { width: min(413px,100%); min-height: 330px; padding: 32px 39px; border-radius: 10px; background: white; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.registration-confirmation > img { margin-bottom: 7px; }
+.registration-confirmation h1 { font-size: 16px; font-weight: 700; }
+.registration-confirmation > p { font-size: 13px; }
+.confirmation-summary { margin-top: 7px; width: min(300px,100%); border: 1px solid #6b6b6b; border-radius: 5px; padding: 10px 15px; font-size: 14px; }
+.confirmation-summary > div { display: flex; justify-content: space-between; text-align: left; gap: 10px; }
+.confirmation-summary > div + div { margin-top: 10px; }
+.confirmation-summary dt { color: #6b6b6b; }
+.confirmation-summary dd { text-align: right; overflow-wrap: anywhere; }
+.registration-confirmation .confirmation-note { font-size: 12px; color: #6b6b6b; }
+@media (max-width: 440px) {
+  .registration-card { padding: 32px 24px; }
+  .registration-form { margin-top: 40px; }
+  .registration-field label, .registration-payment legend { font-size: 14px; }
+  .registration-field input, .registration-field select { padding-inline: 10px; }
+  .registration-confirmation { padding: 28px 24px; }
+}
+@media (max-width: 350px) {
+  .registration-card { padding-inline: 18px; }
+  .registration-row { gap: 10px; }
+  .registration-field input, .registration-field select { padding-inline: 8px; }
+  .registration-actions { gap: 12px; }
+}

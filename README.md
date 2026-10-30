@@ -51,7 +51,7 @@ npm.cmd run start
 
 El diseño de referencia es [Imperium Cross en Figma](https://www.figma.com/design/5EPZT22l83oUzSrBw33zgt/Imperium-Cross?node-id=1-5). Consultar el diseño correspondiente antes de implementar cada pantalla.
 
-Consultar el [alcance y las decisiones de la landing](docs/public-landing.md), incluidos el mapa, la consulta de planes y los enlaces pendientes. La compilación descarga Inter mediante `next/font`; necesita acceso a Google Fonts.
+Consultar el [alcance y las decisiones de la landing](docs/public-landing.md), incluidos el mapa y los enlaces pendientes, y el [flujo de inscripción de dos pasos](docs/membership-registration.md). El formulario conserva los datos en memoria y comunica que registro y pagos aún no están integrados. La compilación descarga Inter mediante `next/font`; necesita acceso a Google Fonts.
 
 ## Flujo de desarrollo
 
