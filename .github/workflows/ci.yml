@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   quality:
-    name: Lint, types and build
+    name: Format, lint, types and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -21,10 +21,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: "24"
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Check formatting
+        run: npm run format:check
       - name: Run ESLint
         run: npm run lint
       - name: Check TypeScript

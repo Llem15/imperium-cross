@@ -1,170 +1,84 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
-:root {
-  --background: #fff;
-  --foreground: #0f0f0f;
+@theme {
+  --color-background: #fff;
+  --color-ink: #0f0f0f;
+  --color-muted: #6b6b6b;
+  --color-line: #a6a6a6;
+  --color-brand-start: #a81e18;
+  --color-brand-end: #db140d;
+  --color-brand-surface: #fff6ed;
+  --color-rating: #ffb71a;
+  --color-footer-muted: #d0d0d0;
+
+  --radius-card: 30px;
+  --radius-panel: 20px;
+  --radius-media: 10px;
+  --radius-control: 5px;
+  --radius-dialog: 15px;
+
+  --container-content: 1135px;
+  --container-benefits: 1096px;
+  --container-plans: 872px;
+  --container-coaches: 916px;
+  --container-wide: 1090px;
+  --container-header: 1168px;
+  --container-footer: 1022px;
+  --container-registration: 413px;
+  --container-mobile-cards: 360px;
+
+  --spacing-landing-action: 189px;
+  --spacing-form-action: 140px;
+  --spacing-control: 40px;
+  --spacing-social: 65px;
+
+  --breakpoint-wide: 78.1875rem;
+  --breakpoint-compact: 27.5625rem;
+  --breakpoint-small: 21.9375rem;
+
+  /* Preserve the original Inter metrics instead of Tailwind's default leading. */
+  --text-xs--line-height: normal;
+  --text-sm--line-height: normal;
+  --text-base--line-height: normal;
+  --text-lg--line-height: normal;
+  --text-xl--line-height: normal;
+  --text-2xl--line-height: normal;
+  --text-4xl--line-height: normal;
+  --text-caption: 13px;
+  --text-caption--line-height: normal;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-inter), Arial, sans-serif;
 }
 
-body { background: var(--background); color: var(--foreground); font-family: var(--font-inter), Arial, sans-serif; line-height: normal; }
-section[id], header[id] { scroll-margin-top: 24px; }
-a, button, summary { -webkit-tap-highlight-color: transparent; }
-a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid #a81e18; outline-offset: 5px; }
-.skip-link { position: fixed; top: 8px; left: 8px; z-index: 50; padding: 12px; background: white; transform: translateY(-180%); }
-.skip-link:focus { transform: translateY(0); }
-.landing-header { height: 130px; background: white; }
-.landing-header-inner { @apply mx-auto flex h-full items-center justify-between; max-width: 1168px; padding-inline: 0; }
-.desktop-navigation { @apply flex items-center font-bold; gap: 40px; }
-.desktop-navigation > a:nth-last-child(2) { margin-right: 26px; }
-.desktop-navigation > .landing-button { width: 153px; min-height: 39px; font-size: 16px; }
-.mobile-navigation { display: none; }
-.landing-button { @apply inline-flex items-center justify-center text-center font-bold text-white; background: linear-gradient(90deg, #a81e18, #db140d); border-radius: 30px; width: 189px; min-height: 48px; padding: 10px; font-size: 20px; }
-.landing-button:hover { filter: brightness(.93); }
-.landing-button-outline { background: transparent; border: 2px solid white; }
-.landing-hero { @apply relative flex items-center justify-center overflow-hidden text-center text-white; height: 789px; }
-.landing-hero .photo-frame img { object-fit: cover; }
-.photo-frame { position: absolute; width: 100%; height: 100%; left: 0; top: 0; pointer-events: none; }
-.photo-shade { position: absolute; inset: 0; background: rgb(15 15 15 / 30%); }
-.hero-content { position: relative; width: min(564px, calc(100% - 40px)); }
-.hero-content h1 { font-size: 36px; font-weight: 700; line-height: normal; }
-.hero-content > p { font-size: 20px; margin-top: 10px; }
-.hero-actions { @apply flex justify-center; gap: 49px; margin-top: 37px; }
-.landing-section { @apply mx-auto; max-width: 1135px; }
-.landing-section > h2, .section-heading h2 { @apply text-center font-bold; font-size: 24px; }
-.section-heading p { margin-top: 10px; text-align: center; }
-.benefits-section { margin-top: 206px; max-width: 1096px; }
-.benefits-grid { @apply grid grid-cols-4; gap: 40px; margin-top: 86px; }
-.benefits-grid article { text-align: center; }
-.benefit-photo { @apply relative overflow-hidden; height: 193px; border-radius: 10px; }
-.benefit-photo img { object-fit: cover; }
-.benefits-grid h3 { font-size: 20px; font-weight: 700; margin-top: 30px; }
-.benefits-grid p { margin-top: 15px; }
-.plans-section { margin-top: 210px; }
-.plans-grid { @apply grid grid-cols-3 mx-auto; max-width: 872px; gap: 70px; margin-top: 96px; }
-.plan-card { @apply flex flex-col items-center; min-height: 598px; border: 2px solid #a6a6a6; border-radius: 30px; padding: 30px 24px 27px; }
-.plan-featured { background: #fff6ed; border-color: #a81e18; }
-.plan-card h3 { font-size: 20px; font-weight: 700; text-align: center; }
-.plan-price { font-size: 36px; font-weight: 700; text-align: center; white-space: nowrap; margin-top: 40px; }
-.plan-price span { display: block; font-size: 24px; }
-.plan-card ul { @apply flex flex-col; gap: 10px; margin-top: 40px; margin-bottom: 40px; max-width: 188px; }
-.plan-card:first-child ul { margin-top: 97px; }
-.plan-card .landing-button { margin-top: auto; font-size: 16px; }
-.facilities-section { margin-top: 211px; }
-.facilities-grid { @apply grid grid-cols-4; gap: 33px; margin-top: 84px; }
-.facility-card { @apply relative overflow-hidden flex items-end justify-center; border-radius: 30px; height: 440px; padding: 0 16px 27px; }
-.facility-card img { object-fit: cover; }
-.facility-card figcaption { @apply relative text-center text-white font-bold; font-size: 24px; }
-.coaches-section { margin-top: 251px; }
-.coaches-grid { @apply grid grid-cols-3 mx-auto; max-width: 916px; gap: 50px; margin-top: 99px; }
-.coach-card { @apply flex flex-col items-center overflow-hidden; border: 1px solid #a6a6a6; border-radius: 30px; padding-bottom: 30px; }
-.coach-photo { @apply relative w-full overflow-hidden; height: 265px; }
-.coach-photo img { object-fit: cover; }
-.coach-card h3 { font-size: 24px; font-weight: 700; margin-top: 20px; text-align: center; }
-.coach-card p { border: 1px solid #db140d; color: #db140d; border-radius: 30px; padding: 5px 22px; margin-top: 15px; }
-.testimonials-section { margin-top: 194px; max-width: 1090px; }
-.testimonials-grid { @apply grid grid-cols-3; gap: 50px; margin-top: 108px; align-items: center; }
-.testimonial-card { border: 1px solid #a6a6a6; border-radius: 10px; padding: 30px 20px; min-height: 213px; }
-.testimonial-card figcaption { @apply flex items-start; gap: 10px; }
-.testimonial-card h3 { font-size: 16px; font-weight: 700; }
-.testimonial-card time { font-size: 14px; }
-.testimonial-card figcaption img { border-radius: 50%; }
-.testimonial-stars { color: #ffb71a; margin-top: 10px; font-weight: 700; }
-.testimonial-card blockquote { margin-top: 10px; font-style: italic; }
-.contact-section { margin-top: 200px; max-width: 1090px; }
-.contact-demo-note { text-align: center; color: #6b6b6b; font-size: 14px; margin-top: 12px; }
-.contact-grid { @apply grid; grid-template-columns: 457fr 604fr; gap: 29px; margin-top: 100px; }
-.contact-details { border: 1px solid #a6a6a6; border-radius: 20px 0 0 20px; padding: 72px 42px; min-height: 639px; }
-.contact-details h3 { font-weight: 700; margin-bottom: 10px; }
-.contact-details > div + div { margin-top: 50px; }
-.contact-details p + p { margin-top: 10px; }
-.contact-details a, .footer-details a { overflow-wrap: anywhere; }
-.contact-directions { display: inline-block; margin-top: 12px; color: #a81e18; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
-.contact-map { @apply relative overflow-hidden; border-radius: 0 20px 20px 0; }
-.contact-map iframe { display: block; width: 100%; height: 100%; border: 0; }
-.landing-cta { @apply relative mx-auto flex items-center justify-center overflow-hidden text-center text-white; max-width: 1090px; height: 424px; margin-top: 148px; border-radius: 20px; }
-.landing-cta .photo-frame img { object-fit: cover; }
-.cta-content { position: relative; width: min(427px, calc(100% - 40px)); }
-.cta-content h2 { font-size: 24px; font-weight: 700; }
-.cta-content p { margin-top: 15px; }
-.cta-content .landing-button { margin-top: 35px; }
-.landing-footer { color: white; background: #0f0f0f; margin-top: 226px; padding: 65px 24px 49px; }
-.footer-inner { @apply mx-auto flex; max-width: 1022px; gap: 144px; }
-.footer-brand { @apply flex flex-col items-center; width: 172px; flex-shrink: 0; padding-top: 20px; text-align: center; }
-.footer-details { @apply grid; grid-template-columns: 150px 150px 246px; gap: 60px; padding: 20px; text-align: center; }
-.footer-details h3 { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
-.footer-details p + p { margin-top: 10px; }
-.footer-socials { @apply flex justify-center; gap: 60px; margin-top: 15px; }
-.footer-socials a { display: inline-block; border-radius: 50%; }
-.footer-socials a:hover { opacity: .85; }
-.social-pending { display: inline-block; }
-.social-status { text-align: center; margin-top: 12px; font-size: 12px; color: #d0d0d0; }
-.social-icon { position: relative; display: inline-block; width: 65px; height: 65px; }
-.social-glyph { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-.footer-copyright { text-align: center; margin-top: 61px; }
+@layer base {
+  body {
+    @apply bg-background font-sans text-ink;
+    line-height: normal;
+  }
 
-@media (min-width: 1251px) {
-  .landing-header-inner > a { align-self: flex-start; margin-top: 8px; }
-  .desktop-navigation { margin-right: -28px; transform: translateY(6.5px); }
-  .hero-content { transform: translateY(-6px); }
+  section[id],
+  header[id] {
+    scroll-margin-top: 24px;
+  }
+
+  a,
+  button,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid var(--color-brand-start);
+    outline-offset: 5px;
+  }
 }
 
-@media (max-width: 1250px) {
-  .landing-header-inner { padding-inline: 24px; }
-  .desktop-navigation { gap: 24px; }
-  .landing-section { margin-inline: 24px; }
-  .landing-cta { margin-inline: 24px; }
-  .footer-inner { gap: 50px; justify-content: center; }
-  .footer-details { gap: 24px; grid-template-columns: 140px 140px minmax(150px,246px); }
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
-@media (max-width: 1023px) {
-  .landing-header { height: 100px; }
-  .landing-header-inner > a img { width: 84px; height: 84px; }
-  .desktop-navigation { display: none; }
-  .mobile-navigation { display: block; position: relative; }
-  .mobile-navigation summary { cursor: pointer; font-weight: 700; padding: 12px; }
-  .mobile-navigation nav { position: absolute; right: 0; z-index: 20; background: white; border: 1px solid #a6a6a6; border-radius: 10px; padding: 16px; width: 220px; display: flex; flex-direction: column; gap: 16px; }
-  .benefits-grid, .facilities-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .plans-grid { gap: 20px; }
-  .plan-card { padding-inline: 12px; }
-  .plan-card .landing-button { width: 100%; }
-  .coaches-grid, .testimonials-grid { gap: 20px; }
-  .coach-photo { height: 230px; }
-  .coach-card h3 { font-size: 20px; }
-  .contact-details { padding: 60px 24px; }
-  .footer-inner { flex-direction: column; align-items: center; gap: 30px; }
-  .footer-brand { padding: 0; }
-  .footer-details { gap: 30px; }
-}
-@media (max-width: 767px) {
-  .landing-hero { height: 620px; }
-  .hero-content h1 { font-size: clamp(25px,6vw,36px); }
-  .hero-actions { gap: 16px; flex-wrap: wrap; }
-  .landing-section { margin-top: 88px; margin-inline: 20px; }
-  .benefits-grid, .plans-grid, .facilities-grid, .coaches-grid, .testimonials-grid, .contact-grid { margin-top: 40px; }
-  .benefits-grid { gap: 32px 20px; }
-  .benefit-photo { height: auto; aspect-ratio: 244 / 193; }
-  .benefits-grid h3 { font-size: 18px; margin-top: 20px; }
-  .plans-grid, .coaches-grid, .testimonials-grid { grid-template-columns: minmax(0,1fr); max-width: 360px; gap: 28px; }
-  .plan-card { min-height: 598px; padding-inline: 24px; }
-  .plan-card .landing-button { width: 189px; }
-  .facilities-grid { gap: 20px; }
-  .facility-card { height: 330px; padding-inline: 8px; }
-  .facility-card figcaption { font-size: 18px; }
-  .coach-photo { height: auto; aspect-ratio: 270 / 265; }
-  .coach-card h3 { font-size: 24px; }
-  .contact-grid { grid-template-columns: minmax(0,1fr); gap: 20px; }
-  .contact-details { min-height: 0; border-radius: 20px; padding: 40px 24px; }
-  .contact-map { height: 440px; border-radius: 20px; }
-  .landing-cta { margin: 64px 20px 0; height: 424px; }
-  .landing-footer { margin-top: 88px; padding: 40px 20px; }
-  .footer-information { width: 100%; }
-  .footer-details { grid-template-columns: minmax(0,1fr); gap: 32px; }
-  .footer-socials { gap: 30px; margin-top: 32px; }
-  .footer-copyright { font-size: 14px; margin-top: 40px; }
-}
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }

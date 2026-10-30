@@ -28,33 +28,44 @@ export const paymentMethods = [
 
 export function validateApplicant(data: Applicant): ApplicantErrors {
   const errors: ApplicantErrors = {};
-  if (!data.firstName.trim()) errors.firstName = "Ingresa tus nombres.";
-  if (!data.lastName.trim()) errors.lastName = "Ingresa tus apellidos.";
-  if (!/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(data.email.trim()) || data.email.includes("..")) {
+  const normalizedEmail = data.email.trim();
+  const normalizedPhone = data.phone.replace(/[\s()-]/g, "");
+  const hasValidEmail =
+    /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(normalizedEmail) && !data.email.includes("..");
+  const hasValidPhone = /^(?:\+51)?9\d{8}$/.test(normalizedPhone);
+  const hasValidDni = /^\d{8}$/.test(data.dni);
+  const hasValidGoal = (trainingGoals as readonly string[]).includes(data.goal);
+
+  if (!data.firstName.trim()) {
+    errors.firstName = "Ingresa tus nombres.";
+  }
+  if (!data.lastName.trim()) {
+    errors.lastName = "Ingresa tus apellidos.";
+  }
+  if (!hasValidEmail) {
     errors.email = "Ingresa un correo electrónico válido.";
   }
-  if (!/^(?:\+51)?9\d{8}$/.test(data.phone.replace(/[\s()-]/g, ""))) {
+  if (!hasValidPhone) {
     errors.phone = "Ingresa un celular peruano de 9 dígitos; puedes incluir +51.";
   }
-  if (!/^\d{8}$/.test(data.dni)) errors.dni = "El DNI debe tener exactamente 8 dígitos.";
-  if (!(trainingGoals as readonly string[]).includes(data.goal)) {
+  if (!hasValidDni) {
+    errors.dni = "El DNI debe tener exactamente 8 dígitos.";
+  }
+  if (!hasValidGoal) {
     errors.goal = "Selecciona tu objetivo de entrenamiento.";
   }
+
   return errors;
 }
 
-// Solo un backend autorizado debe construir estos resultados a partir de datos persistidos.
-export type ConfirmedRegistration = {
-  registrationId: string;
+// Estado visual del prototipo: no representa un registro ni un pago persistido.
+export type RegistrationPreview = {
   planId: PlanId;
-} & (
-  | { status: "pending-payment"; method: "cash" }
-  | {
-      status: "active";
-      method: "card" | "yape";
-      paymentReference: string;
-      validUntil: string;
-      attendanceCode: string;
-      credentialsEmailSent: boolean;
-    }
-);
+  method: PaymentMethod;
+};
+
+// Valores de referencia de Figma, utilizados solo para la vista del frontend.
+export const confirmationExample = {
+  validUntil: "08/10/2026",
+  attendanceCode: "#4821",
+} as const;

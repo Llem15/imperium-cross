@@ -11,17 +11,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Imperium Cross",
-  description:
-    "Sistema de gestión de un gimnasio y seguimiento de entrenamientos de sus miembros.",
+  description: "Sistema de gestión de un gimnasio y seguimiento de entrenamientos de sus miembros.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="es"
-      className={`${inter.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es" className={`${inter.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { navigation } from "./landing-content";
@@ -10,26 +10,35 @@ export function MobileNavigation() {
     if (menuRef.current) menuRef.current.open = false;
   }
 
+  function handleEscape(event: React.KeyboardEvent<HTMLDetailsElement>) {
+    if (event.key !== "Escape" || !menuRef.current?.open) return;
+
+    event.preventDefault();
+    closeMenu();
+    menuRef.current.querySelector("summary")?.focus();
+  }
+
   return (
     <details
-      className="mobile-navigation"
+      data-ui="mobile-navigation"
       ref={menuRef}
-      onKeyDown={(event) => {
-        if (event.key === "Escape" && menuRef.current?.open) {
-          event.preventDefault();
-          closeMenu();
-          menuRef.current.querySelector("summary")?.focus();
-        }
-      }}
+      onKeyDown={handleEscape}
+      className="relative hidden max-lg:block"
     >
-      <summary>Menú</summary>
-      <nav aria-label="Navegación móvil">
+      <summary className="cursor-pointer p-3 font-bold">Menú</summary>
+      <nav
+        aria-label="Navegación móvil"
+        className="absolute right-0 z-20 flex w-55 flex-col gap-4
+          rounded-media border border-line bg-white p-4"
+      >
         {navigation.map(([label, id]) => (
           <a key={id} href={`#${id}`} onClick={closeMenu}>
             {label}
           </a>
         ))}
-        <a href="#contacto" onClick={closeMenu}>Contáctanos</a>
+        <a href="#contacto" onClick={closeMenu}>
+          Contáctanos
+        </a>
       </nav>
     </details>
   );

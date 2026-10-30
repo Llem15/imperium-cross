@@ -17,18 +17,29 @@ La captura adicional del usuario especifica el formulario como overlay sobre la 
 
 Figma muestra un selector de objetivo pero no enumera opciones. Se utiliza un catálogo inicial de demostración: mejorar condición física, ganar fuerza, mejorar resistencia y otro; queda sujeto a definición funcional posterior.
 
-## Límites reales y confirmaciones
+## Confirmaciones visuales del frontend
 
-«Pagar» informa que Tarjeta/Yape no están integrados y que no se realizó ningún cargo ni se activó una membresía. No se solicitan números de tarjeta, códigos bancarios ni datos de Yape.
+El flujo permite recorrer las pantallas finales de Figma como prototipo de frontend. «Pagar» con Tarjeta o Yape muestra «Vista previa del pago» dentro del mismo modal; en Efectivo, «Continuar» muestra «Vista previa del registro». Se conserva el plan seleccionado y su precio.
 
-En efectivo, «Continuar» explica que todavía no se puede guardar la inscripción. No se muestra «Tu registro fue guardado». Una implementación futura deberá persistir primero la solicitud, mantener la membresía pendiente y activarla solo después de que recepción confirme el pago.
+Las pantallas finales identifican explícitamente la vista previa y aclaran que no guarda datos, procesa pagos ni envía correos. No hay persistencia, cargos ni activación de membresías. No se solicitan números de tarjeta, códigos bancarios ni datos de Yape.
 
-`RegistrationConfirmation` prepara las dos pantallas de Figma, pero no está conectada al formulario ni a una ruta de éxito. Requiere un resultado de backend con identificador de inscripción; el caso activo requiere además referencia de pago, vigencia y código de asistencia. Sin ese resultado no renderiza una confirmación. No se inventan fechas, identificadores, pagos o correos enviados; ese texto solo corresponde a respuestas reales del backend. Los tipos y las comprobaciones del componente no sustituyen autorización, persistencia ni verificación de pagos en el servidor.
+`RegistrationConfirmation` recibe un `RegistrationPreview`, no una respuesta de backend. La vigencia `08/10/2026` y el código `#4821` son ejemplos fijos de Figma centralizados en `confirmationExample`; no se calculan ni se interpretan como credenciales reales.
 
-Pendiente: API de inscripción, validación y autorización en servidor, PostgreSQL, confirmación de caja y proveedor real para Tarjeta/Yape. No se introducen en esta tarea.
+## Organización del frontend
+
+- `registration-dialog.tsx`: tarjetas de planes y ciclo del modal, teclado, foco y bloqueo del scroll.
+- `registration-form.tsx`: composición de los pasos y foco del encabezado.
+- `registration-steps.tsx`: presentación de datos personales, selección de plan y pago.
+- `use-registration.ts`: estado en memoria, transiciones y aplicación de validaciones.
+- `registration-model.ts`: tipos, catálogos y funciones de validación sin dependencias de la interfaz.
+- `registration-confirmation.tsx`: vista previa final; no confirma operaciones reales.
+
+Los estilos utilizan utilidades de Tailwind y los tokens de `app/globals.css`. No se mantiene una hoja CSS independiente para el formulario.
+
+Pendiente: API de inscripción, validación y autorización en servidor, PostgreSQL, confirmación de caja y proveedor real para Tarjeta/Yape. Al incorporar esos servicios, las confirmaciones deberán depender de respuestas verificadas del servidor y reemplazar los valores de ejemplo. No se introducen en esta tarea.
 
 ## Verificación
 
-Además de ESLint, TypeScript, build y `git diff --check`, se prueba la entrada desde los tres planes, campos vacíos e inválidos, cambio de plan, ida y vuelta entre pasos, métodos de pago, ausencia de confirmaciones falsas y de transmisiones de datos. Se revisan etiquetas, foco, imágenes y desbordamiento a 320, 390, 768, 1024 y 1440 px. Las vistas de confirmación solo pueden revisarse con fixtures locales de prueba, fuera de las rutas públicas.
+Además de ESLint, TypeScript, build y `git diff --check`, se prueba la entrada desde los tres planes, campos vacíos e inválidos, cambio de plan, ida y vuelta entre pasos, las dos variantes de confirmación visual y la ausencia de transmisiones de datos. Se revisan etiquetas, foco, imágenes y desbordamiento a 320, 390, 768, 1024 y 1440 px.
 
-La batería se ejecutó en desarrollo y producción con Chrome aislado para los tres planes y las cinco resoluciones: sin errores de ejecución, consola o hidratación, ni datos personales transmitidos o almacenados. Se verificaron Escape, cierre por botón y fondo, foco cíclico, retorno al botón de origen y descarte de datos al cerrar. Los seis SVG responden HTTP 200. Se revisaron capturas del modal y fixtures locales de ambas confirmaciones; no se probaron registros ni pagos reales porque no existen esos servicios.
+Las verificaciones evalúan el comportamiento visual del frontend; no prueban registros ni pagos reales porque no existen esos servicios.

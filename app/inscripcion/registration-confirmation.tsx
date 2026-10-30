@@ -1,25 +1,79 @@
-import Image from "next/image";
-import { plans } from "../landing-content";
-import type { ConfirmedRegistration } from "./registration-model";
+﻿"use client";
 
-// No está conectada al formulario: requiere un resultado confirmado por el backend.
-export function RegistrationConfirmation({ receipt }: { receipt: ConfirmedRegistration | null }) {
-  if (!receipt?.registrationId.trim()) return null;
-  const plan = plans.find((item) => item.id === receipt.planId);
+import Image from "next/image";
+import { useEffect, useRef } from "react";
+import { plans } from "../landing-content";
+import { confirmationExample } from "./registration-model";
+import type { RegistrationPreview } from "./registration-model";
+
+// Esta pantalla es una vista previa local, no una confirmación de backend.
+export function RegistrationConfirmation({ preview }: { preview: RegistrationPreview }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const plan = plans.find((item) => item.id === preview.planId);
+  const isCashPayment = preview.method === "cash";
+  const icon = isCashPayment ? "cash" : "payment";
+  const title = isCashPayment ? "Vista previa del registro" : "Vista previa del pago";
+  const description = isCashPayment
+    ? "El pago presencial quedará pendiente hasta la confirmación en recepción."
+    : "Así se verá la confirmación de tu membresía cuando el pago esté validado.";
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
+
   if (!plan) return null;
-  const paid = receipt.status === "active";
-  if (paid && (!receipt.paymentReference.trim() || !receipt.validUntil.trim() || !receipt.attendanceCode.trim())) return null;
 
   return (
-    <section className="registration-confirmation" aria-labelledby="confirmation-title" role="status">
-      <Image src={`/registration/${paid ? "payment" : "cash"}-confirmed.svg`} alt="" width={60} height={60} />
-      <h1 id="confirmation-title">{paid ? "¡Pago Exitoso!" : "Tu registro fue guardado"}</h1>
-      <p>{paid ? "Bienvenido(a) a Imperium Cross. Tu membresía ya está activa." : "Elegiste pagar en efectivo. Tu membresía permanecerá pendiente hasta que recepción confirme el pago presencial."}</p>
-      <dl className="confirmation-summary">
-        <div><dt>Plan</dt><dd>{plan.name} — S/{plan.price}</dd></div>
-        {paid && <><div><dt>Vigente hasta</dt><dd>{receipt.validUntil}</dd></div><div><dt>Código de asistencia</dt><dd>{receipt.attendanceCode}</dd></div></>}
+    <section
+      data-ui="registration-confirmation"
+      aria-labelledby="registration-title"
+      className="flex min-h-82.5 w-full max-w-registration flex-col items-center
+        justify-center gap-2 rounded-media bg-white px-[39px] py-8 text-center
+        max-compact:px-6 max-compact:py-7"
+    >
+      <Image
+        src={`/registration/${icon}-confirmed.svg`}
+        alt=""
+        width={60}
+        height={60}
+        className="mb-1.75"
+      />
+      <h1
+        id="registration-title"
+        tabIndex={-1}
+        ref={headingRef}
+        className="text-base font-bold focus:outline-none"
+      >
+        {title}
+      </h1>
+      <p className="text-caption">{description}</p>
+      <dl
+        data-ui="confirmation-summary"
+        className="mt-1.75 w-full max-w-75 rounded-control border border-muted
+          px-3.75 py-2.5 text-left text-sm"
+      >
+        <div className="flex justify-between gap-2.5">
+          <dt className="text-muted">Plan</dt>
+          <dd className="text-right wrap-anywhere">
+            {plan.name} — S/{plan.price}
+          </dd>
+        </div>
+        {!isCashPayment && (
+          <>
+            <div className="mt-2.5 flex justify-between gap-2.5">
+              <dt className="text-muted">Vigente hasta</dt>
+              <dd className="text-right wrap-anywhere">{confirmationExample.validUntil}</dd>
+            </div>
+            <div className="mt-2.5 flex justify-between gap-2.5">
+              <dt className="text-muted">Código de asistencia</dt>
+              <dd className="text-right wrap-anywhere">{confirmationExample.attendanceCode}</dd>
+            </div>
+          </>
+        )}
       </dl>
-      <p className="confirmation-note">{paid ? (receipt.credentialsEmailSent ? "Te enviamos un correo con tus credenciales de acceso al sistema." : "El envío del correo de acceso está pendiente.") : "Al confirmar tu pago en recepción, se podrá gestionar tu acceso al sistema."}</p>
+      <p className="text-xs text-muted">
+        Esta vista previa no guarda datos, procesa pagos ni envía correos.
+      </p>
     </section>
   );
 }

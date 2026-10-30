@@ -1,4 +1,4 @@
-﻿# Imperium Cross
+# Imperium Cross
 
 Proyecto de demostración de un sistema web de gestión y seguimiento de entrenamientos destinado a un único gimnasio. Incluye una landing pública responsive basada en Figma. La gestión interna, autenticación y persistencia todavía no están implementadas; los datos comerciales y de contacto son de prueba.
 
@@ -11,11 +11,12 @@ Versiones instaladas actualmente, registradas en `package-lock.json`:
 - TypeScript 5.9.3 con tipado estricto.
 - Tailwind CSS 4.3.3 y `@tailwindcss/turbopack` 4.3.3.
 - ESLint 9.39.5 y `eslint-config-next` 16.4.3.
+- Prettier 3.9.10 y `prettier-plugin-tailwindcss` 0.8.1 para formato y orden de clases.
 - npm para gestionar dependencias.
 
 ## Instalación y desarrollo
 
-Requisitos: Node.js 20.9 o superior y npm. En el entorno inicial se utilizan Node.js 24.18.0 y npm 12.2.0.
+Requisitos: Node.js 24 y npm. En el entorno inicial se utilizan Node.js 24.18.0 y npm 12.2.0.
 
 Desde la raíz del proyecto, instalar las dependencias según el archivo de bloqueo:
 
@@ -36,6 +37,7 @@ Los comandos usan `npm.cmd` y `npx.cmd` para funcionar en PowerShell cuando la p
 ## Verificaciones y producción
 
 ```powershell
+npm.cmd run format:check
 npm.cmd run lint
 npm.cmd run typecheck
 npm.cmd run build
@@ -51,13 +53,13 @@ npm.cmd run start
 
 El diseño de referencia es [Imperium Cross en Figma](https://www.figma.com/design/5EPZT22l83oUzSrBw33zgt/Imperium-Cross?node-id=1-5). Consultar el diseño correspondiente antes de implementar cada pantalla.
 
-Consultar el [alcance y las decisiones de la landing](docs/public-landing.md), incluidos el mapa y los enlaces pendientes, y el [flujo de inscripción de dos pasos](docs/membership-registration.md). El formulario conserva los datos en memoria y comunica que registro y pagos aún no están integrados. La compilación descarga Inter mediante `next/font`; necesita acceso a Google Fonts.
+Consultar el [alcance y las decisiones de la landing](docs/public-landing.md), incluidos el mapa y los enlaces pendientes, y el [flujo de inscripción de dos pasos](docs/membership-registration.md). El formulario conserva los datos en memoria y permite recorrer las confirmaciones visuales de Figma; no registra inscripciones ni procesa pagos reales. La compilación descarga Inter mediante `next/font`; necesita acceso a Google Fonts.
 
 ## Flujo de desarrollo
 
 Mantener `main` estable y trabajar en ramas independientes por tarea. El alcance del sistema es un único gimnasio, sin arquitectura multiempresa.
 
-Consultar la [arquitectura inicial](docs/architecture.md) y la [guía de contribución](CONTRIBUTING.md). El CI verifica instalación reproducible, ESLint, tipos y compilación en Pull Requests y cambios en `main`, con Node.js 24.
+Consultar la [arquitectura inicial](docs/architecture.md) y la [guía de contribución](CONTRIBUTING.md). El CI verifica instalación reproducible, formato, ESLint, tipos y compilación en Pull Requests y cambios en `main`, con Node.js 24.
 
 ### Aviso de lockfile externo
 

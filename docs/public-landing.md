@@ -10,7 +10,7 @@ Se corrigen tildes evidentes sin cambiar el significado. Los estados de foco y h
 
 ## Proyecto de demostración y contacto
 
-El usuario confirmó que no es un proyecto real para el negocio: contactos, precios, horarios y testimonios son contenido de demostración, no información comercial validada. Se indica en la sección de contacto. Antes de un uso real deben sustituirse o aprobarse los datos y contenidos de prueba.
+El usuario confirmó que no es un proyecto real para el negocio: contactos, precios, horarios y testimonios son contenido de demostración, no información comercial validada. El aviso visible de demostración se retiró de la interfaz a petición del usuario. Antes de un uso real deben sustituirse o aprobarse los datos y contenidos de prueba.
 
 Dirección, coordenadas, teléfono, correo y URLs se centralizan en `app/landing-content.ts`. La ubicación de referencia proporcionada es Prol. 28 de Julio 581, Lurigancho-Chosica, Lima, Perú; coordenadas `-11.9391165, -76.6966084`.
 
@@ -22,17 +22,21 @@ Los enlaces de teléfono, correo y WhatsApp utilizan protocolos válidos. Son ac
 
 «Elegir plan» inicia la [inscripción en dos pasos](membership-registration.md) conservando el plan elegido. No redirige a WhatsApp ni crea socios, reservas, pagos o suscripciones reales.
 
-Los formularios de datos y selección de plan/método de pago de Figma funcionan como interfaz local. No se simula un envío exitoso: el último paso comunica que registro y pagos aún no están disponibles. La validación en servidor, persistencia y confirmación de pagos requieren una tarea posterior con backend.
+Los formularios de datos y selección de plan/método de pago funcionan como interfaz local. A petición del usuario, el flujo muestra también las confirmaciones visuales de Figma dentro del mismo modal, sin ejecutar registros, cargos ni correos. La validación en servidor, persistencia y confirmación real de pagos requieren una tarea posterior con backend.
 
 TikTok utiliza el perfil enlazado en el Linktree de referencia. Facebook e Instagram conservan sus iconos con estado «enlace pendiente», sin enlaces falsos ni controles inactivos que aparenten funcionar. No se verificaron URLs oficiales para esas redes.
 
 ## Organización y validación
 
 - `app/page.tsx`: composición de las secciones como componente de servidor.
-- `app/landing-content.ts`: contenido y enlaces compartidos.
+- `app/landing-content.ts`: contenido, enlaces y metadatos de recorte de imágenes.
+- `app/landing-shell.tsx`: encabezado y pie de página.
+- `app/landing-sections.tsx`: secciones de contenido de la landing.
+- `app/landing-ui.tsx`: imágenes, acciones y estructura de sección reutilizadas.
+- `app/ui-styles.ts`: variantes compartidas de botones.
 - `app/landing-contact.tsx`: datos de contacto, mapa y redes reutilizados.
 - `app/landing-navigation.tsx`: única interacción local de cliente para el menú móvil.
-- `app/globals.css`: tokens, estilos y adaptación responsive con Tailwind CSS.
+- `app/globals.css`: tokens de Tailwind CSS 4 y reglas globales de accesibilidad; la distribución y adaptación responsive usan utilidades en los componentes.
 - `app/layout.tsx`: idioma, metadatos e Inter mediante `next/font`.
 
 Verificaciones requeridas antes de publicar: `npm run lint`, `npm run typecheck`, `npm run build` y `git diff --check`. Revisar además la ejecución e hidratación, imágenes, anclas, menú móvil, enlaces, mapa y capturas a 320, 390, 768, 1024 y 1440 px. No basta con compilar.
