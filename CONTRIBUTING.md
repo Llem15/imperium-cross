@@ -29,7 +29,7 @@ npm run build
 git diff --check
 ```
 
-En PowerShell, usar `npm.cmd` si la política de ejecución bloquea `npm.ps1`. El script `typecheck` genera primero los tipos de rutas de Next.js y luego verifica TypeScript sin emitir archivos. El build necesita acceso a Google Fonts para descargar las fuentes Geist ya configuradas.
+En PowerShell, usar `npm.cmd` si la política de ejecución bloquea `npm.ps1`. El script `typecheck` genera primero los tipos de rutas de Next.js y luego verifica TypeScript sin emitir archivos. El build necesita acceso a Google Fonts para descargar Inter mediante `next/font`.
 
 Ejecutar también las pruebas pertinentes cuando existan. No publicar cambios con verificaciones fallidas sin explicar y resolver el problema. Revisar el diff y confirmar que no contiene secretos ni archivos generados.
 

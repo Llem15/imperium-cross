@@ -1,6 +1,6 @@
 ﻿# Imperium Cross
 
-Sistema web de gestión y seguimiento de entrenamientos destinado a un único gimnasio. El proyecto se encuentra en su etapa inicial de configuración; las funcionalidades y pantallas aún no están implementadas.
+Proyecto de demostración de un sistema web de gestión y seguimiento de entrenamientos destinado a un único gimnasio. Incluye una landing pública responsive basada en Figma. La gestión interna, autenticación y persistencia todavía no están implementadas; los datos comerciales y de contacto son de prueba.
 
 ## Stack tecnológico
 
@@ -50,6 +50,8 @@ npm.cmd run start
 ## Diseño oficial
 
 El diseño de referencia es [Imperium Cross en Figma](https://www.figma.com/design/5EPZT22l83oUzSrBw33zgt/Imperium-Cross?node-id=1-5). Consultar el diseño correspondiente antes de implementar cada pantalla.
+
+Consultar el [alcance y las decisiones de la landing](docs/public-landing.md), incluidos el mapa, la consulta de planes y los enlaces pendientes. La compilación descarga Inter mediante `next/font`; necesita acceso a Google Fonts.
 
 ## Flujo de desarrollo
 
