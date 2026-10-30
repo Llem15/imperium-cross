@@ -37,7 +37,7 @@ Los comandos usan `npm.cmd` y `npx.cmd` para funcionar en PowerShell cuando la p
 
 ```powershell
 npm.cmd run lint
-npx.cmd --no-install tsc --noEmit --incremental false
+npm.cmd run typecheck
 npm.cmd run build
 ```
 
@@ -54,3 +54,9 @@ El diseño de referencia es [Imperium Cross en Figma](https://www.figma.com/desi
 ## Flujo de desarrollo
 
 Mantener `main` estable y trabajar en ramas independientes por tarea. El alcance del sistema es un único gimnasio, sin arquitectura multiempresa.
+
+Consultar la [arquitectura inicial](docs/architecture.md) y la [guía de contribución](CONTRIBUTING.md). El CI verifica instalación reproducible, ESLint, tipos y compilación en Pull Requests y cambios en `main`, con Node.js 24.
+
+### Aviso de lockfile externo
+
+Si existe un `package-lock.json` en una carpeta superior fuera del repositorio, Next.js 16.4.3 puede avisar que lo ha ignorado. Es una advertencia de detección de raíz: el archivo externo se descarta y no debe eliminarse ni incorporarse al proyecto. No ampliar `turbopack.root` hacia esa carpeta para silenciarla. En esta versión, declarar la raíz explícitamente no evita la exploración inicial que produce el aviso.
