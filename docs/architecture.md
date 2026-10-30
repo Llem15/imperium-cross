@@ -15,12 +15,12 @@ Imperium Cross es una aplicación para un único gimnasio. Se desarrollará como
 
 Los siguientes roles son una propuesta de alcance; sus permisos concretos deberán definirse y aprobarse antes de implementar autorización:
 
-| Rol | Responsabilidad prevista |
-| --- | --- |
-| Administrador | Administración del gimnasio y de los accesos. |
-| Entrenador | Gestión y seguimiento de entrenamientos. |
-| Recepción | Operación de recepción y atención a socios. |
-| Socio | Consulta de su información y seguimiento de sus entrenamientos. |
+| Rol           | Responsabilidad prevista                                        |
+| ------------- | --------------------------------------------------------------- |
+| Administrador | Administración del gimnasio y de los accesos.                   |
+| Entrenador    | Gestión y seguimiento de entrenamientos.                        |
+| Recepción     | Operación de recepción y atención a socios.                     |
+| Socio         | Consulta de su información y seguimiento de sus entrenamientos. |
 
 ## Seguridad y datos
 

@@ -1,26 +1,84 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-background: #fff;
+  --color-ink: #0f0f0f;
+  --color-muted: #6b6b6b;
+  --color-line: #a6a6a6;
+  --color-brand-start: #a81e18;
+  --color-brand-end: #db140d;
+  --color-brand-surface: #fff6ed;
+  --color-rating: #ffb71a;
+  --color-footer-muted: #d0d0d0;
+
+  --radius-card: 30px;
+  --radius-panel: 20px;
+  --radius-media: 10px;
+  --radius-control: 5px;
+  --radius-dialog: 15px;
+
+  --container-content: 1135px;
+  --container-benefits: 1096px;
+  --container-plans: 872px;
+  --container-coaches: 916px;
+  --container-wide: 1090px;
+  --container-header: 1168px;
+  --container-footer: 1022px;
+  --container-registration: 413px;
+  --container-mobile-cards: 360px;
+
+  --spacing-landing-action: 189px;
+  --spacing-form-action: 140px;
+  --spacing-control: 40px;
+  --spacing-social: 65px;
+
+  --breakpoint-wide: 78.1875rem;
+  --breakpoint-compact: 27.5625rem;
+  --breakpoint-small: 21.9375rem;
+
+  /* Preserve the original Inter metrics instead of Tailwind's default leading. */
+  --text-xs--line-height: normal;
+  --text-sm--line-height: normal;
+  --text-base--line-height: normal;
+  --text-lg--line-height: normal;
+  --text-xl--line-height: normal;
+  --text-2xl--line-height: normal;
+  --text-4xl--line-height: normal;
+  --text-caption: 13px;
+  --text-caption--line-height: normal;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-background font-sans text-ink;
+    line-height: normal;
+  }
+
+  section[id],
+  header[id] {
+    scroll-margin-top: 24px;
+  }
+
+  a,
+  button,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid var(--color-brand-start);
+    outline-offset: 5px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

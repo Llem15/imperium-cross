@@ -1,0 +1,45 @@
+# Inscripción de membresías
+
+## Flujo público
+
+Los tres botones «Elegir plan» abren un modal sobre la misma landing, con fondo oscurecido y el plan elegido conservado. No hay navegación a otra página, cambio de URL ni pestañas nuevas. El nombre, precio y características se reutilizan desde `app/landing-content.ts`.
+
+1. **Tus datos:** nombres, apellidos, correo, celular peruano, DNI de ocho dígitos y objetivo obligatorios. Los mensajes se vinculan a sus controles; no se permite avanzar con errores y el foco vuelve al primer campo inválido.
+2. **Elige tu plan:** permite cambiar el plan y elegir Tarjeta, Yape o Efectivo. «Atrás» conserva los datos, el plan y el método seleccionados.
+
+Todo el estado es local al componente React. No se usan localStorage, sessionStorage, cookies, parámetros de URL para datos personales ni servicios externos para recibirlos. Recargar o cerrar el modal descarta los valores; no hay persistencia, envío de correo ni creación de membresías.
+
+## Referencia visual y decisiones
+
+Se inspeccionaron los frames `67:114`, `67:115`, `67:166` y `67:189` del [diseño oficial](https://www.figma.com/design/5EPZT22l83oUzSrBw33zgt/Imperium-Cross?node-id=1-5). Se reutilizan sus SVG de progreso, radios y confirmación en `public/registration/`, Inter, colores, controles, dimensiones de tarjeta y botones.
+
+La captura adicional del usuario especifica el formulario como overlay sobre la landing. Se usa un `dialog` nativo con fondo oscurecido, cierre mediante botón, Escape o clic fuera de la tarjeta, foco contenido y retorno al botón de origen. Se bloquea el scroll del fondo y el contenido del modal puede desplazarse en pantallas pequeñas. En móvil se reducen márgenes y padding manteniendo el orden y los campos. Los mensajes de validación o indisponibilidad pueden ampliar la tarjeta para no ocultar contenido.
+
+Figma muestra un selector de objetivo pero no enumera opciones. Se utiliza un catálogo inicial de demostración: mejorar condición física, ganar fuerza, mejorar resistencia y otro; queda sujeto a definición funcional posterior.
+
+## Confirmaciones visuales del frontend
+
+El flujo permite recorrer las pantallas finales de Figma como prototipo de frontend. «Pagar» con Tarjeta o Yape muestra «Vista previa del pago» dentro del mismo modal; en Efectivo, «Continuar» muestra «Vista previa del registro». Se conserva el plan seleccionado y su precio.
+
+Las pantallas finales identifican explícitamente la vista previa y aclaran que no guarda datos, procesa pagos ni envía correos. No hay persistencia, cargos ni activación de membresías. No se solicitan números de tarjeta, códigos bancarios ni datos de Yape.
+
+`RegistrationConfirmation` recibe un `RegistrationPreview`, no una respuesta de backend. La vigencia `08/10/2026` y el código `#4821` son ejemplos fijos de Figma centralizados en `confirmationExample`; no se calculan ni se interpretan como credenciales reales.
+
+## Organización del frontend
+
+- `registration-dialog.tsx`: tarjetas de planes y ciclo del modal, teclado, foco y bloqueo del scroll.
+- `registration-form.tsx`: composición de los pasos y foco del encabezado.
+- `registration-steps.tsx`: presentación de datos personales, selección de plan y pago.
+- `use-registration.ts`: estado en memoria, transiciones y aplicación de validaciones.
+- `registration-model.ts`: tipos, catálogos y funciones de validación sin dependencias de la interfaz.
+- `registration-confirmation.tsx`: vista previa final; no confirma operaciones reales.
+
+Los estilos utilizan utilidades de Tailwind y los tokens de `app/globals.css`. No se mantiene una hoja CSS independiente para el formulario.
+
+Pendiente: API de inscripción, validación y autorización en servidor, PostgreSQL, confirmación de caja y proveedor real para Tarjeta/Yape. Al incorporar esos servicios, las confirmaciones deberán depender de respuestas verificadas del servidor y reemplazar los valores de ejemplo. No se introducen en esta tarea.
+
+## Verificación
+
+Además de ESLint, TypeScript, build y `git diff --check`, se prueba la entrada desde los tres planes, campos vacíos e inválidos, cambio de plan, ida y vuelta entre pasos, las dos variantes de confirmación visual y la ausencia de transmisiones de datos. Se revisan etiquetas, foco, imágenes y desbordamiento a 320, 390, 768, 1024 y 1440 px.
+
+Las verificaciones evalúan el comportamiento visual del frontend; no prueban registros ni pagos reales porque no existen esos servicios.

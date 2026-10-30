@@ -1,0 +1,28 @@
+# Local agent instructions and tooling
+**/AGENTS.md
+.agents/
+.codex/
+
+# Dependencies and generated output
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+.vercel/
+next-env.d.ts
+package-lock.json
+*.tsbuildinfo
+*.min.*
+*.map
+
+# Static resources
+public/
+app/favicon.ico
+**/*.{png,jpg,jpeg,gif,webp,avif,svg,ico,pdf,woff,woff2,ttf,otf,mp4,webm}
+
+# Local configuration, logs and secrets
+.env*
+*.log
+*.pem
