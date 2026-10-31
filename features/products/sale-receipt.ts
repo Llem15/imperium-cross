@@ -52,7 +52,7 @@ export async function downloadSaleReceipt(sale: Sale) {
     doc.setDrawColor(pdfColors.line).setLineWidth(0.3).line(margin, y, right, y);
   }
 
-  // El total no se separa de la tabla salvo que no quepa en la página.
+  // total 
   if (y + 26 > contentBottom) {
     doc.addPage();
     y = 12;

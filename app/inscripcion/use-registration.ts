@@ -42,7 +42,7 @@ export function useRegistration(initialPlanId: PlanId) {
 
   function continueRegistration(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // Solo cambia la vista local: no registra inscripciones ni realiza pagos.
+    // Solo cambia la vista local
     setCompleted(true);
   }
 

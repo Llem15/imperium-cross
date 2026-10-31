@@ -56,7 +56,7 @@ export async function createReceiptPdf({
   numberLabel: string;
   filePrefix: string;
 }) {
-  // Se cargan al pulsar descargar para no sumar peso a la carga inicial de la página.
+  // Se cargan al pulsar descargar
   const [{ jsPDF }, logo, regular, bold] = await Promise.all([
     import("jspdf"),
     fetchBytes("/landing/logo-header.png"),

@@ -54,7 +54,7 @@ export const routines: readonly {
   {
     id: "routine-upper",
     name: "Tren superior",
-    // El frame muestra ocho tarjetas de dos ejercicios; cada posición es una prescripción.
+    // El frame muestra ocho tarjetas de dos ejercicioS
     prescriptions: Array.from({ length: 8 }, (_, index) => ({
       id: `prescription-${index + 1}`,
       exerciseId: index % 4 < 2 ? "exercise-bench" : "exercise-row",

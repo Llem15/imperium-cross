@@ -12,7 +12,7 @@ export type Applicant = {
 };
 export type ApplicantErrors = Partial<Record<keyof Applicant, string>>;
 
-// Figma no define las opciones del desplegable: catálogo inicial de demostración.
+
 export const trainingGoals = [
   "Mejorar mi condición física",
   "Ganar fuerza",
@@ -58,13 +58,13 @@ export function validateApplicant(data: Applicant): ApplicantErrors {
   return errors;
 }
 
-// Estado visual del prototipo: no representa un registro ni un pago persistido.
+// Estado visual del prototipo
 export type RegistrationPreview = {
   planId: PlanId;
   method: PaymentMethod;
 };
 
-// Valores de referencia de Figma, utilizados solo para la vista del frontend.
+// Valores de referencia 
 export const confirmationExample = {
   validUntil: "08/10/2026",
   attendanceCode: "#4821",

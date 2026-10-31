@@ -75,7 +75,7 @@ export const demoProfiles: readonly DemoProfile[] = [
   },
 ];
 
-// Datos públicos y ficticios para la demostración; no son credenciales reales.
+// DATOS DE PRUEBA
 export const demoPassword = "Imperium-demo";
 export const demoAccounts = [
   { username: "lin.admin", email: "lin@admin.com", role: "admin" },
@@ -84,7 +84,7 @@ export const demoAccounts = [
   { username: "melani.cliente", email: "melani@gmail.com", role: "member" },
 ] as const;
 
-// Identidades y registros ficticios. La fecha fija evita resultados variables al renderizar.
+// DATOS DE PRUEBA: FECHA Y MIEMBROS
 export const demoDate = "2026-12-07";
 export const demoTrainerId = "trainer-pedro";
 export const demoMemberId = "member-melani";
