@@ -1,5 +1,3 @@
-import type { PlanId } from "@/app/inscripcion/registration-model";
-
 export type DemoRole = "admin" | "reception" | "trainer" | "member";
 
 type NavigationItem = {
@@ -27,10 +25,10 @@ export const demoProfiles: readonly DemoProfile[] = [
     avatar: "avatar-admin.png",
     navigation: [
       { label: "Dashboard", href: "/admin" },
-      { label: "Usuarios" },
-      { label: "Clientes" },
-      { label: "Membresías" },
-      { label: "Productos" },
+      { label: "Usuarios", href: "/admin/usuarios" },
+      { label: "Clientes", href: "/admin/clientes" },
+      { label: "Membresías", href: "/admin/membresias" },
+      { label: "Productos", href: "/admin/productos" },
     ],
   },
   {
@@ -42,9 +40,9 @@ export const demoProfiles: readonly DemoProfile[] = [
     avatar: "avatar-reception.png",
     navigation: [
       { label: "Clientes", href: "/recepcion/clientes" },
-      { label: "Membresías y pagos" },
-      { label: "Asistencia" },
-      { label: "Venta de productos" },
+      { label: "Membresías y pagos", href: "/recepcion/membresias" },
+      { label: "Asistencia", href: "/recepcion/asistencia" },
+      { label: "Venta de productos", href: "/recepcion/productos" },
     ],
   },
   {
@@ -56,9 +54,9 @@ export const demoProfiles: readonly DemoProfile[] = [
     avatar: "avatar-trainer.png",
     navigation: [
       { label: "Mis Clientes", href: "/entrenador/clientes" },
-      { label: "Ejercicios" },
-      { label: "Rutina" },
-      { label: "Seguimiento" },
+      { label: "Ejercicios", href: "/entrenador/ejercicios" },
+      { label: "Rutina", href: "/entrenador/rutinas" },
+      { label: "Seguimiento", href: "/entrenador/seguimiento" },
     ],
   },
   {
@@ -70,12 +68,21 @@ export const demoProfiles: readonly DemoProfile[] = [
     avatar: "avatar-member.png",
     navigation: [
       { label: "Mi rutina", href: "/socio/mi-rutina" },
-      { label: "Perfil" },
-      { label: "Productos" },
-      { label: "Pagos" },
+      { label: "Perfil", href: "/socio/perfil" },
+      { label: "Productos", href: "/socio/productos" },
+      { label: "Pagos", href: "/socio/pagos" },
     ],
   },
 ];
+
+// Datos públicos y ficticios para la demostración; no son credenciales reales.
+export const demoPassword = "Imperium-demo";
+export const demoAccounts = [
+  { username: "lin.admin", email: "lin@example.test", role: "admin" },
+  { username: "milagros.recepcion", email: "milagros@example.test", role: "reception" },
+  { username: "pedro.entrenador", email: "pedro@example.test", role: "trainer" },
+  { username: "melani.cliente", email: "melani@example.test", role: "member" },
+] as const;
 
 // Identidades y registros ficticios. La fecha fija evita resultados variables al renderizar.
 export const demoDate = "2026-12-07";
@@ -87,9 +94,9 @@ export type DemoMember = {
   firstName: string;
   lastName: string;
   email: string;
-  planId: PlanId;
-  status: "active" | "pending";
-  trainerId: string;
+  planId: string;
+  status: "active" | "pending" | "expired";
+  trainerId: string | null;
   routineId: string | null;
   joinedOn: string;
   expiresOn: string | null;
@@ -166,13 +173,13 @@ export const members: readonly DemoMember[] = [
   },
 ];
 
-export const planLabels: Record<PlanId, string> = {
+export const planLabels: Record<string, string> = {
   basico: "Básico",
   premium: "Premium",
   pro: "Pro",
 };
 
-export function fullName(member: DemoMember) {
+export function fullName(member: Pick<DemoMember, "firstName" | "lastName">) {
   return `${member.firstName} ${member.lastName}`;
 }
 

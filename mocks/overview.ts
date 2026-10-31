@@ -1,4 +1,5 @@
 import { demoDate, fullName, members } from "./dashboard";
+import type { DemoMember } from "./dashboard";
 
 export const monthlyIncome = [
   { month: "Ene", cents: 1110600 },
@@ -19,9 +20,12 @@ export function formatMoney(cents: number) {
   return `S/ ${new Intl.NumberFormat("es-PE", { maximumFractionDigits: 2 }).format(cents / 100)}`;
 }
 
-export function overviewMetrics() {
+export function overviewMetrics(currentMembers: readonly DemoMember[] = members) {
+  const members = currentMembers;
   const month = demoDate.slice(0, 7);
-  const active = members.filter((member) => member.status === "active").length;
+  const active = members.filter(
+    (member) => member.status === "active" && (!member.expiresOn || member.expiresOn >= demoDate),
+  ).length;
   const recent = members.filter((member) => member.joinedOn.startsWith(month)).length;
   const expiring = members.filter((member) => {
     if (member.status !== "active" || !member.expiresOn) return false;

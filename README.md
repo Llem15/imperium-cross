@@ -1,6 +1,6 @@
 # Imperium Cross
 
-Proyecto de demostración de un sistema web de gestión y seguimiento de entrenamientos destinado a un único gimnasio. Incluye una landing pública responsive y las vistas iniciales de administrador, recepción, entrenador y socio basadas en Figma. Los datos son ficticios; no hay autenticación real, persistencia ni procesamiento de pagos.
+Proyecto de demostración de un sistema web de gestión y seguimiento de entrenamientos destinado a un único gimnasio. Incluye una landing pública responsive, login de demostración y 17 páginas internas de administrador, recepción, entrenador y socio basadas en Figma. Las operaciones internas utilizan datos ficticios compartidos en memoria; no hay autenticación real, persistencia ni procesamiento de pagos.
 
 ## Stack tecnológico
 
@@ -32,7 +32,7 @@ npm.cmd run dev
 
 Abrir [http://localhost:3000](http://localhost:3000).
 
-Para recorrer los paneles, abrir [el acceso de demostración](http://localhost:3000/login) y elegir un perfil. Las rutas internas también pueden visitarse directamente. Consultar [rutas, arquitectura y limitaciones del frontend interno](docs/dashboard-foundation.md).
+Para recorrer los paneles, abrir [el acceso de demostración](http://localhost:3000/login) y consultar las cuentas ficticias disponibles debajo del formulario. Introducir el usuario y la contraseña de prueba del perfil. Las rutas internas también pueden visitarse directamente; este acceso no proporciona autenticación real. Consultar [cuentas, rutas y limitaciones del frontend interno](docs/dashboard-foundation.md).
 
 Los comandos usan `npm.cmd` y `npx.cmd` para funcionar en PowerShell cuando la política de ejecución bloquea los scripts `.ps1`. En otras terminales se puede usar `npm` y `npx`.
 

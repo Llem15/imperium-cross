@@ -1,59 +1,72 @@
-# Base del frontend interno
+# Frontend interno
 
-Esta entrega implementa las vistas iniciales de cuatro perfiles de demostración para un único gimnasio. Las rutas pueden abrirse directamente; el selector de perfiles organiza la navegación y no autentica ni autoriza usuarios.
+Prototipo para un único gimnasio. Incluye las 17 páginas internas de los cuatro perfiles del diseño. Las interacciones modifican datos ficticios en memoria; recargar restaura el escenario inicial. No hay backend, base de datos, correo, autenticación, autorización ni procesamiento de pagos.
 
-## Rutas y alcance
+El recuento corresponde a los archivos `page.tsx` de `app/(interno)`: 5 páginas de administrador, 4 de recepción, 4 de entrenador y 4 de socio. `/login` es una ruta de acceso adicional; la landing pública tampoco forma parte del recuento interno.
 
-| Ruta                   | Contenido                                                                   |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `/login`               | Login visual con selección de Administrador, Recepción, Entrenador o Socio. |
-| `/admin`               | Indicadores, ingresos mensuales y actividad reciente de ejemplo.            |
-| `/recepcion/clientes`  | Clientes, búsqueda local y consulta de detalle.                             |
-| `/entrenador/clientes` | Solo clientes asignados al entrenador de demostración, búsqueda y detalle.  |
-| `/socio/mi-rutina`     | Rutina, ejercicios, parámetros y notas de seguimiento consultables.         |
+## Acceso y navegación
 
-El acceso conserva la composición del frame `88:188` y adapta el selector `99:981` a cuatro perfiles. La contraseña es una representación visual, no un campo editable. La recuperación se presenta sin enlace activo porque sus estados quedan fuera de esta entrega.
+`/login` acepta usuario o correo ficticio y una contraseña pública de prueba. Rechaza combinaciones incorrectas y lleva a la página inicial del perfil correspondiente. Las cuentas se muestran en el desplegable «Cuentas de demostración» del login:
 
-## Organización
+| Perfil        | Usuario              | Contraseña de prueba |
+| ------------- | -------------------- | -------------------- |
+| Administrador | `lin.admin`          | `Imperium-demo`      |
+| Recepción     | `milagros.recepcion` | `Imperium-demo`      |
+| Entrenador    | `pedro.entrenador`   | `Imperium-demo`      |
+| Socio         | `melani.cliente`     | `Imperium-demo`      |
 
-Los grupos `(acceso)` e `(interno)` separan las rutas y comparten el layout raíz existente. El layout interno compone `DashboardShell`; su configuración depende de la ruta, no de una sesión. La landing y la inscripción conservan sus componentes.
+Estas cadenas son fixtures públicos, no secretos ni credenciales reales. No introducir cuentas personales. No se guardan contraseñas, cookies, tokens ni sesiones. Los registros de personal creados desde Usuarios no crean cuentas de acceso. La cabecera permite salir al login; no permite saltar directamente entre perfiles.
 
-- `components/dashboard/`: shell, sidebar, cabecera, selector de perfiles y elementos de presentación compartidos.
-- `components/ui/dialog.tsx`: diálogo nativo utilizado por navegación móvil y detalles, con Escape, cierre exterior, foco inicial, retorno al origen y bloqueo del scroll de fondo.
-- `features/access/`: selección de perfil y acceso visual.
-- `features/members/`: tabla, búsqueda y consulta de clientes para recepción y entrenador.
-- `features/overview/`: métricas, gráfico de barras accesible y actividad del administrador.
-- `features/training/`: rutina del socio y detalles de ejercicios y notas.
-- `mocks/`: tipos, perfiles, cinco socios, dos ejercicios, una rutina, notas y resumen mensual.
+Las rutas siguen abiertas y pueden visitarse por URL: el formulario organiza el recorrido de demostración y no proporciona seguridad. La autenticación y los permisos deberán implementarse en servidor en otra etapa.
 
-Las páginas componen contenido y mantienen metadatos propios. Los componentes de cliente se limitan a navegación e interacciones. No hay proveedor global de estado porque las consultas no modifican entidades compartidas. No hay servicios HTTP ficticios, tokens, cookies, almacenamiento de credenciales ni persistencia de datos personales.
+| Perfil        | Rutas y contenido                                                                                                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Administrador | `/admin`: resumen; `/admin/usuarios`: personal; `/admin/clientes`: socios y entrenador asignado; `/admin/membresias`: planes; `/admin/productos`: inventario.                            |
+| Recepción     | `/recepcion/clientes`: socios; `/recepcion/membresias`: matrículas, renovaciones y registros de pago; `/recepcion/asistencia`: ingresos; `/recepcion/productos`: catálogo y venta local. |
+| Entrenador    | `/entrenador/clientes`: socios asignados; `/entrenador/ejercicios`: biblioteca; `/entrenador/rutinas`: creación y asignación; `/entrenador/seguimiento`: notas.                          |
+| Socio         | `/socio/mi-rutina`: ejercicios y notas; `/socio/perfil`: datos, membresía y asistencia; `/socio/productos`: consulta; `/socio/pagos`: renovación e historial.                            |
 
-## Datos e interacciones
+## Organización y estado
 
-Los nombres proceden del contenido ficticio de Figma y los correos utilizan `example.test`. Los IDs son estables. La fecha de referencia es `2026-12-07`; evita que fechas relativas y vencimientos cambien según el dispositivo o la fecha de ejecución. Cuatro socios pertenecen al entrenador de demostración; el quinto permite comprobar que el filtro por asignación funciona.
+Los grupos `(acceso)` e `(interno)` organizan rutas y layouts. `DashboardShell` selecciona el menú por el prefijo de la ruta y señala el enlace activo. No deriva permisos de esa selección.
 
-La rutina y sus notas utilizan los mismos IDs de socio que las consultas del entrenador. Las ocho tarjetas reproducen las posiciones del frame y representan prescripciones de dos ejercicios, sin duplicar sus descripciones. La búsqueda normaliza mayúsculas y tildes, funciona en memoria y contempla resultados vacíos.
+- `components/dashboard/`: shell, tablas, búsqueda, estados, formularios y acciones compartidas.
+- `components/ui/dialog.tsx`: diálogo nativo con Escape, cierre exterior, foco inicial, retorno al origen y bloqueo del scroll de fondo.
+- `features/access/`: formulario de acceso ficticio.
+- `features/administration/`, `features/members/`, `features/products/` y `features/training/`: páginas e interacciones por funcionalidad.
+- `features/demo/`: contexto React que comparte el escenario entre páginas y perfiles. Está en el layout raíz para conservar cambios al salir al login y entrar con otra cuenta de prueba.
+- `mocks/`: entidades tipadas y datos iniciales relacionados mediante IDs.
 
-Clientes activos, nuevas membresías y próximos vencimientos se derivan de los socios. El ingreso del mes coincide con diciembre de la serie mensual; los importes de ejemplo se almacenan en céntimos. No se crean miles de entidades para reproducir contadores ilustrativos de Figma. El gráfico incluye una tabla equivalente para tecnologías de asistencia.
+No hay servicios HTTP ficticios ni persistencia en navegador. Las fotos seleccionadas se leen localmente y no se suben a ningún servidor. Se aceptan PNG, JPG, WebP y GIF de hasta 5 MB. La landing y la inscripción pública conservan su estado y comportamiento independientes.
 
-## Referencia visual y recursos
+## Interacciones
 
-Referencia: [Imperium Cross en Figma](https://www.figma.com/design/5EPZT22l83oUzSrBw33zgt/Imperium-Cross?node-id=1-5). Frames principales: `88:188`, `99:981`, `8:447`, `36:80`, `36:109` y `36:135`. Detalles: `97:686`, `95:546` y `93:494`.
+Administración permite crear, consultar, editar y eliminar personal, clientes y productos del escenario. Los planes se crean, editan y activan o desactivan; no se eliminan. Los planes inactivos no están disponibles para nuevas matrículas. La asignación del entrenador se realiza desde la edición del cliente.
 
-Los recursos de `public/dashboard/` proceden del contexto de diseño de esos frames. Los logos se reutilizan desde `public/landing/` tras comprobar que los archivos son idénticos. No hay URLs temporales de Figma en el código. Los recortes de ejercicios se conservan como metadatos; las imágenes con `fill` reciben sus dimensiones desde un contenedor.
+Recepción prepara registros pendientes o pagados de prueba y renovaciones. El formulario informa que no efectúa cobros reales. La asistencia comprueba membresía activa, pendiente o vencida y evita duplicar un ingreso en la misma fecha de prueba. La venta controla unidades disponibles, calcula el total y actualiza el stock local al confirmarse.
 
-La ilustración de press de banca es el PNG animado original de Figma. Se sirve sin optimización para conservar su animación; sus fotogramas pueden variar entre capturas.
+El entrenador consulta sus clientes, administra ejercicios, crea rutinas con series, repeticiones y descanso, y las asigna a sus socios. Las notas se crean o editan con fecha y texto. La rutina y el progreso del socio reflejan esos cambios al navegar sin recargar.
 
-Se mantienen Inter, degradado rojo, sidebar de 233 px, cabecera de 121 px y dimensiones principales de escritorio. Se añaden tokens internos sin cambiar los valores de la landing. Los datos, fechas e indicadores varían respecto de los ejemplos incoherentes del diseño para mantener relaciones consistentes.
+El socio consulta su perfil, asistencia, catálogo e historial. La renovación actualiza solo el escenario local. Los comprobantes descargables son archivos de texto marcados como ejemplos sin validez fiscal.
 
-No se proporcionaron frames internos móviles. En tablet y móvil se utiliza un sidebar modal, tarjetas reorganizadas y desplazamiento horizontal contenido dentro de las tablas. Los destinos pendientes del sidebar y las acciones de edición aparecen deshabilitados, sin rutas inexistentes. La cabecera permite cambiar de perfil y regresar al acceso; el icono de notificaciones es decorativo porque su panel no está definido.
+Los importes se guardan en céntimos. La fecha del escenario es `2026-12-07`, independiente del reloj del equipo. Los ingresos mensuales y la actividad inicial del dashboard son agregados ilustrativos; los contadores de socios se derivan del estado compartido.
 
-La consulta de recepción reutiliza el detalle de socio ya diseñado para el entrenador. Para el remo se aplica el patrón del detalle de ejercicio con texto ficticio específico. Estas adaptaciones no incorporan pantallas nuevas ni operaciones de gestión.
+## Referencia y adaptaciones
 
-## Verificación y siguientes entregas
+Referencia: [Imperium Cross en Figma](https://www.figma.com/design/5EPZT22l83oUzSrBw33zgt/Imperium-Cross?node-id=1-5).
 
-Ejecutar formato, ESLint, TypeScript, build y `git diff --check`. Revisar en navegador login, selección y cambio de perfiles, búsquedas, aislamiento de clientes asignados, detalles, Escape, Tab, foco de retorno, sidebar y recursos a 320, 390, 768, 1024 y 1440 px. Comprobar también la landing y el recorrido de inscripción existentes.
+Se consultaron las páginas de administración `39:270`, `67:345`, `39:598`, `39:722`; recepción `36:80`, `42:1011`, `73:369`, `73:598`; entrenamiento `36:109`, `74:962`, `74:1350`, `74:1584`; socio `36:135`, `76:1885`, `78:2172`, `344:21`; login `88:188` y sus grupos de contenido. Se revisaron también los formularios y detalles de esas entidades. Los recursos originales se sirven desde `public/dashboard/`; los logos se reutilizan desde `public/landing/`. No hay URLs temporales de Figma en ejecución.
 
-La revisión de esta entrega se ejecutó sobre producción local en Chrome aislado: 25 combinaciones de ruta/resolución, 45 recorridos de inscripción pública y capturas de la landing en las cinco anchuras. También se comprobaron Mayús+Tab, cierre por botón y fondo, retorno del foco, cierre del sidebar al pasar a escritorio y búsqueda con tildes. No se detectaron errores de ejecución o hidratación, imágenes rotas, desbordamiento horizontal de página ni transmisiones de datos personales. Las tablas conservan desplazamiento horizontal dentro de su región. No se realizaron pruebas en dispositivos físicos ni con lectores de pantalla.
+Se conservan Inter, degradado rojo, sidebar de 233 px y cabecera de 121 px. Los recortes de imágenes se expresan en contenedores dimensionados; `Image` con `fill` no recibe `style.width`. Los ejercicios animados se sirven sin optimización.
 
-Quedan pendientes recuperación de contraseña, administración completa, asignaciones editables, membresías y pagos, asistencia, ventas, editor de rutinas, registro de seguimiento, perfil y pagos del socio y NutrIA. No se implementan backend, autenticación real, base de datos, correo ni procesamiento de pagos.
+El diseño no especifica móvil: se adapta con sidebar modal, rejillas reorganizadas y desplazamiento de tablas dentro de su región. Los ejemplos repetidos de Figma se sustituyen por entidades distintas y estados vacíos. Se corrigen inconsistencias de texto y datos: duración de plan en días, sin DNI en el plan, búsqueda de ejercicios, etiqueta de vencimiento y precios coherentes con la landing. Se añade el selector de entrenador dentro del formulario de cliente para cubrir la asignación indicada por el diseño; Figma no define ese control. Los formularios de edición y eliminación reutilizan patrones existentes, dado que no todos tienen variantes propias.
+
+La recuperación de contraseña y las notificaciones no se han implementado. La campana sigue siendo decorativa. El login editable es una adaptación expresamente solicitada para usar cuentas y contraseñas ficticias. Los mensajes de operaciones internas de prueba evitan afirmar pagos, envíos o autenticación reales. No se modifica el recorrido visual de inscripción pública.
+
+## Verificaciones
+
+Ejecutar `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run build` y `git diff --check`. Revisar en navegador las rutas, credenciales correctas e incorrectas, menús por perfil, búsquedas, operaciones locales, asignaciones y notas compartidas, membresías, asistencia, stock, descargas, diálogos y navegación móvil. Comprobar también la landing y su inscripción.
+
+En la revisión previa se comprobaron las rutas de login y las páginas internas en Chrome aislado a 320, 390, 768, 1024 y 1440 px, sin errores de ejecución, hidratación, imágenes rotas ni desbordamiento de página. Se verificaron cuentas válidas e inválidas, edición y eliminación de personal, creación de planes y productos, estado compartido entre perfiles, asignación de rutinas, notas, asistencia duplicada y pendiente, matrícula y stock. También se revisaron diálogos móviles, carga de imagen local, comprobante descargable y las 45 combinaciones del recorrido público de inscripción, sin transmisiones de datos de formularios. Se inspeccionaron capturas de escritorio y móvil. No se probaron dispositivos físicos ni lectores de pantalla.
+
+En el cierre del PR se repitieron las 18 rutas actuales (login y 17 páginas internas) a 390 y 1440 px: 36 combinaciones. Se comprobaron nuevamente las cuatro cuentas, credenciales incorrectas, salida al login, operaciones locales de administración, rutinas y notas compartidas entre perfiles, matrículas, asistencia y stock. La inscripción pública pasó sus 45 combinaciones de plan, método y anchura con los textos manuales conservados. No se detectaron errores de ejecución, hidratación, recursos fallidos ni transmisiones de formularios. Se verificó también que el icono global servido desde `app/icon.png` coincide con el logo original de Imperium Cross en landing, login y panel. Las comprobaciones previas de tablet y de los demás diálogos no se repitieron porque su implementación no cambió.

@@ -19,9 +19,9 @@ Figma muestra un selector de objetivo pero no enumera opciones. Se utiliza un ca
 
 ## Confirmaciones visuales del frontend
 
-El flujo permite recorrer las pantallas finales de Figma como prototipo de frontend. «Pagar» con Tarjeta o Yape muestra «Vista previa del pago» dentro del mismo modal; en Efectivo, «Continuar» muestra «Vista previa del registro». Se conserva el plan seleccionado y su precio.
+El flujo permite recorrer las pantallas finales de Figma como prototipo de frontend. Tarjeta o Yape muestran «¡Pago Exitoso!» dentro del mismo modal; Efectivo muestra «Tu registro fue Guardado». Se conserva el plan seleccionado y su precio.
 
-Las pantallas finales identifican explícitamente la vista previa y aclaran que no guarda datos, procesa pagos ni envía correos. No hay persistencia, cargos ni activación de membresías. No se solicitan números de tarjeta, códigos bancarios ni datos de Yape.
+Los textos visibles de confirmación y correo se conservan por decisión del usuario para reproducir el recorrido visual. No son respuestas verificadas de un servidor: no hay persistencia, cargos, activación de membresías ni envío de correos. No se solicitan números de tarjeta, códigos bancarios ni datos de Yape. Antes de utilizar el sistema con usuarios reales, esos mensajes deberán depender de operaciones confirmadas en el servidor.
 
 `RegistrationConfirmation` recibe un `RegistrationPreview`, no una respuesta de backend. La vigencia `08/10/2026` y el código `#4821` son ejemplos fijos de Figma centralizados en `confirmationExample`; no se calculan ni se interpretan como credenciales reales.
 

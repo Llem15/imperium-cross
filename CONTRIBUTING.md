@@ -2,7 +2,7 @@
 
 ## Desarrollo
 
-Mantener `main` estable y trabajar mediante ramas por tarea. Leer las instrucciones locales de `AGENTS.md`, si están disponibles, y consultar la documentación de la versión instalada en `node_modules/next/dist/docs/` antes de modificar código de Next.js.
+Mantener `main` estable y trabajar mediante ramas por tarea. Consultar la documentación de la versión instalada en `node_modules/next/dist/docs/` antes de modificar código de Next.js.
 
 Usar TypeScript estricto, evitar `any` innecesario y seguir las convenciones de Next.js y React. Separar presentación, reglas de negocio y acceso a datos. Añadir módulos y componentes compartidos cuando exista una necesidad real. No introducir microservicios ni soporte multiempresa.
 
@@ -16,7 +16,7 @@ Usar dos espacios, UTF-8 y finales de línea LF según `.editorconfig`. Prettier
 
 El plugin oficial `prettier-plugin-tailwindcss` ordena las clases de los atributos JSX y utiliza `app/globals.css` como entrada de Tailwind CSS 4, incluidos los tokens del proyecto. Se conservan los saltos de línea de las clases para facilitar la lectura. Mantener los bloques separados y los nombres explícitos; el formateador no sustituye estas decisiones.
 
-`.prettierignore` excluye `AGENTS.md`, dependencias, archivos generados, el lockfile y recursos estáticos. No modificar esos archivos para satisfacer el formato. ESLint conserva su configuración y comprueba la calidad del código; Prettier se ocupa del formato.
+El archivo `.prettierignore` excluye dependencias, archivos generados, el lockfile y recursos estáticos. No modificar esos archivos para satisfacer el formato. ESLint conserva su configuración y comprueba la calidad del código; Prettier se ocupa del formato.
 
 Usar utilidades de Tailwind CSS 4 para distribución, responsive, tipografía y estados. Centralizar colores, radios y dimensiones reutilizados en `@theme` de `app/globals.css`. Conservar CSS global para tokens, estilos base y preferencias de accesibilidad. Los recortes específicos de imágenes se mantienen como datos tipados, no como estilos de distribución duplicados.
 

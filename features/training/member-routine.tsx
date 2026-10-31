@@ -4,38 +4,65 @@ import Image from "next/image";
 import { useState } from "react";
 import { DashboardPanel, RoutineBadge } from "@/components/dashboard/dashboard-ui";
 import { Dialog } from "@/components/ui/dialog";
-import { demoMemberId, members } from "@/mocks/dashboard";
-import { exercises, progressNotes, routines } from "@/mocks/training";
+import { demoMemberId } from "@/mocks/dashboard";
+import { useDemoData } from "@/features/demo/demo-provider";
 import type { Exercise, Prescription, ProgressNote } from "@/mocks/training";
 
-function ExerciseImage({ exercise, detail = false }: { exercise: Exercise; detail?: boolean }) {
+export function ExerciseImage({
+  exercise,
+  detail = false,
+}: {
+  exercise: Exercise;
+  detail?: boolean;
+}) {
   return (
     <div
       className={`relative mx-auto aspect-[108/95] overflow-hidden rounded-lg ${detail ? "w-50" : "w-27 max-w-full"}`}
     >
-      <div className="absolute" style={exercise.crop}>
-        <Image
-          src={`/dashboard/${detail ? exercise.detailImage : exercise.image}`}
-          alt=""
-          fill
-          unoptimized={exercise.id === "exercise-bench"}
-          sizes={detail ? "200px" : "108px"}
-          className="object-fill"
-        />
-      </div>
+      {exercise.image ? (
+        <div className="absolute" style={exercise.crop}>
+          <Image
+            src={
+              exercise.image.startsWith("data:")
+                ? exercise.image
+                : `/dashboard/${detail ? exercise.detailImage : exercise.image}`
+            }
+            alt=""
+            fill
+            unoptimized
+            sizes={detail ? "200px" : "108px"}
+            className="object-fill"
+          />
+        </div>
+      ) : (
+        <span className="absolute inset-0 grid place-items-center bg-dashboard-canvas text-xs text-muted">
+          Sin imagen
+        </span>
+      )}
     </div>
   );
 }
 
-function LevelBadge() {
+export function LevelBadge({ level = "Medio" }: { level?: Exercise["level"] }) {
+  const appearance =
+    level === "Alta"
+      ? "border-brand-end bg-red-100 text-brand-end"
+      : level === "Bajo"
+        ? "border-status-pending bg-status-pending-surface text-status-pending"
+        : "border-status-info bg-status-info-surface text-status-info";
   return (
-    <span className="inline-flex min-w-12 items-center justify-center rounded-control border border-status-info bg-status-info-surface px-1.25 py-0.5 text-[10px] text-status-info">
-      Medio
+    <span
+      className={`inline-flex min-w-12 items-center justify-center rounded-control border px-1.25 py-0.5 text-[10px] ${appearance}`}
+    >
+      {level}
     </span>
   );
 }
 
 function ExerciseDetail({ prescription }: { prescription: Prescription }) {
+  const {
+    data: { exercises },
+  } = useDemoData();
   const exercise = exercises.find((item) => item.id === prescription.exerciseId);
   if (!exercise) return null;
   const parameters = [
@@ -56,7 +83,7 @@ function ExerciseDetail({ prescription }: { prescription: Prescription }) {
         {exercise.name}
       </h2>
       <div className="text-center">
-        <LevelBadge />
+        <LevelBadge level={exercise.level} />
       </div>
       <dl className="grid grid-cols-3 gap-3 max-sm:gap-2">
         {parameters.map((parameter) => (
@@ -82,11 +109,16 @@ function ExerciseDetail({ prescription }: { prescription: Prescription }) {
 }
 
 export function MemberRoutine() {
+  const {
+    data: { members, routines, exercises, notes: progressNotes },
+  } = useDemoData();
   const [selectedExercise, setSelectedExercise] = useState<Prescription | null>(null);
   const [selectedNote, setSelectedNote] = useState<ProgressNote | null>(null);
   const member = members.find((item) => item.id === demoMemberId);
   const routine = routines.find((item) => item.id === member?.routineId);
-  const notes = progressNotes.filter((note) => note.memberId === demoMemberId);
+  const notes = progressNotes
+    .filter((note) => note.memberId === demoMemberId)
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <>
@@ -113,7 +145,7 @@ export function MemberRoutine() {
                       <ExerciseImage exercise={exercise} />
                       <span className="flex flex-col items-center gap-1.25">
                         <span className="text-caption">{exercise.name}</span>
-                        <LevelBadge />
+                        <LevelBadge level={exercise.level} />
                       </span>
                     </button>
                   );

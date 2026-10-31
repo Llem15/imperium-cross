@@ -1,14 +1,20 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 
-export function StatusBadge({ status }: { status: "active" | "pending" }) {
+export function StatusBadge({
+  status,
+  label,
+}: {
+  status: "active" | "pending" | "expired";
+  label?: string;
+}) {
   const active = status === "active";
   return (
     <span
       className={`inline-flex min-h-6.25 items-center rounded-media px-2.5 py-0.75 text-sm
-      ${active ? "bg-status-success-surface text-status-success" : "bg-status-pending-surface text-status-pending"}`}
+      ${active ? "bg-status-success-surface text-status-success" : status === "expired" ? "bg-red-100 text-brand-end" : "bg-status-pending-surface text-status-pending"}`}
     >
-      {active ? "Activo" : "Pendiente"}
+      {label ?? (active ? "Activo" : status === "expired" ? "Vencida" : "Pendiente")}
     </span>
   );
 }

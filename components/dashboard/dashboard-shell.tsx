@@ -11,11 +11,12 @@ import { Dialog } from "@/components/ui/dialog";
 type Profile = (typeof demoProfiles)[number];
 
 function Sidebar({ profile, onNavigate }: { profile: Profile; onNavigate?: () => void }) {
+  const pathname = usePathname();
   return (
     <>
       <Link
         href="/login"
-        aria-label="Imperium Cross, elegir perfil"
+        aria-label="Imperium Cross, volver al acceso"
         onClick={onNavigate}
         className="mx-auto mt-5.25 block w-25"
       >
@@ -40,9 +41,9 @@ function Sidebar({ profile, onNavigate }: { profile: Profile; onNavigate?: () =>
             <Link
               key={item.label}
               href={item.href}
-              aria-current="page"
+              aria-current={pathname === item.href ? "page" : undefined}
               onClick={onNavigate}
-              className={`${base} bg-linear-to-r/srgb from-brand-start to-brand-end text-white`}
+              className={`${base} ${pathname === item.href ? "bg-linear-to-r/srgb from-brand-start to-brand-end" : "hover:bg-white/10"} text-white`}
             >
               {content}
             </Link>
@@ -79,7 +80,7 @@ function ProfileMenu({ profile }: { profile: Profile }) {
   return (
     <details ref={detailsRef} onKeyDown={closeOnEscape} className="relative min-w-0">
       <summary
-        aria-label={`Cambiar perfil de demostración. Perfil actual: ${profile.label}`}
+        aria-label={`Opciones de la cuenta de ${profile.name}`}
         className="flex cursor-pointer list-none items-center gap-3.75 rounded-control [&::-webkit-details-marker]:hidden"
       >
         <Image
@@ -98,27 +99,17 @@ function ProfileMenu({ profile }: { profile: Profile }) {
         </span>
       </summary>
       <nav
-        aria-label="Perfiles de demostración"
+        aria-label="Opciones de cuenta"
         className="absolute top-full right-0 z-20 mt-3 w-60 max-w-[calc(100vw-32px)] rounded-media
           border border-line bg-white p-3 text-sm shadow-lg"
       >
-        <p className="px-3 py-2 text-xs text-muted">Perfil de demostración</p>
-        {demoProfiles.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            onClick={closeMenu}
-            className="block rounded-control px-3 py-2.5 hover:bg-brand-surface"
-          >
-            {item.label}
-          </Link>
-        ))}
+        <p className="px-3 py-2 text-xs text-muted">Cuenta de demostración · {profile.label}</p>
         <Link
           href="/login"
           onClick={closeMenu}
           className="mt-2 block border-t border-dashboard-line px-3 py-2.5 text-brand-start"
         >
-          Volver al acceso
+          Salir
         </Link>
       </nav>
     </details>
@@ -127,7 +118,11 @@ function ProfileMenu({ profile }: { profile: Profile }) {
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const profile = demoProfiles.find((item) => pathname === item.href) ?? demoProfiles[0];
+  const profile =
+    demoProfiles.find((item) => {
+      const prefix = item.href.split("/")[1];
+      return pathname === `/${prefix}` || pathname.startsWith(`/${prefix}/`);
+    }) ?? demoProfiles[0];
   const [navigationOpen, setNavigationOpen] = useState(false);
 
   useEffect(() => {

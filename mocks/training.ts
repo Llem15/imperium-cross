@@ -6,7 +6,7 @@ export type Exercise = {
   image: string;
   detailImage: string;
   crop: { width: string; height: string; left: string; top: string };
-  level: "Medio";
+  level: "Bajo" | "Medio" | "Alta";
   description: string;
   instructions: string;
 };

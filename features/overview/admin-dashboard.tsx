@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useDemoData } from "@/features/demo/demo-provider";
 import { formatMoney, monthlyIncome, overviewMetrics, recentActivity } from "@/mocks/overview";
 
 function IncomeChart() {
@@ -55,11 +58,12 @@ function IncomeChart() {
 }
 
 export function AdminDashboard() {
+  const { data } = useDemoData();
   return (
     <section className="pt-4.25">
       <h1 className="text-base">Resumen general</h1>
       <div className="mt-12 grid grid-cols-4 gap-3.5 max-xl:grid-cols-2 max-sm:grid-cols-1">
-        {overviewMetrics().map((metric) => (
+        {overviewMetrics(data.members).map((metric) => (
           <div
             key={metric.label}
             className="flex min-h-29.5 justify-between gap-2 rounded-statistic border border-dashboard-line bg-white p-4.5"
