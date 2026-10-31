@@ -34,10 +34,9 @@ Los textos visibles de confirmación y correo se conservan por decisión del usu
 
 Los estilos utilizan utilidades de Tailwind y los tokens de `app/globals.css`. No se mantiene una hoja CSS independiente para el formulario.
 
-Pendiente: API de inscripción, validación y autorización en servidor, PostgreSQL, confirmación de caja y proveedor real para Tarjeta/Yape. Al incorporar esos servicios, las confirmaciones deberán depender de respuestas verificadas del servidor y reemplazar los valores de ejemplo. No se introducen en esta tarea.
 
 ## Verificación
 
 Además de ESLint, TypeScript, build y `git diff --check`, se prueba la entrada desde los tres planes, campos vacíos e inválidos, cambio de plan, ida y vuelta entre pasos, las dos variantes de confirmación visual y la ausencia de transmisiones de datos. Se revisan etiquetas, foco, imágenes y desbordamiento a 320, 390, 768, 1024 y 1440 px.
 
-Las verificaciones evalúan el comportamiento visual del frontend; no prueban registros ni pagos reales porque no existen esos servicios.
+
