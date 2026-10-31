@@ -1,6 +1,6 @@
 # Imperium Cross
 
-Proyecto de un sistema web de gestión y seguimiento de entrenamientos destinado a un único gimnasio. Incluye una landing pública responsive, login y páginas internas de administrador, recepción, entrenador y socio basadas en el diseño de Figma. 
+Proyecto de un sistema web de gestión y seguimiento de entrenamientos destinado a un único gimnasio. Incluye una landing pública responsive, login y páginas internas de administrador, recepción, entrenador y socio basadas en el diseño de Figma.
 
 ## Stack tecnológico
 

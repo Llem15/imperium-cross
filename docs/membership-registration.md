@@ -15,7 +15,6 @@ Se inspeccionaron los frames `67:114`, `67:115`, `67:166` y `67:189` del [diseñ
 
 La captura adicional del usuario especifica el formulario como overlay sobre la landing. Se usa un `dialog` nativo con fondo oscurecido, cierre mediante botón, Escape o clic fuera de la tarjeta, foco contenido y retorno al botón de origen. Se bloquea el scroll del fondo y el contenido del modal puede desplazarse en pantallas pequeñas. En móvil se reducen márgenes y padding manteniendo el orden y los campos. Los mensajes de validación o indisponibilidad pueden ampliar la tarjeta para no ocultar contenido.
 
-
 ## Confirmaciones visuales del frontend
 
 El flujo permite recorrer las pantallas finales de Figma como prototipo de frontend. Tarjeta o Yape muestran «¡Pago Exitoso!» dentro del mismo modal; Efectivo muestra «Tu registro fue Guardado». Se conserva el plan seleccionado y su precio.

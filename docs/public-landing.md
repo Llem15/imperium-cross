@@ -10,7 +10,6 @@ Se corrigen tildes evidentes sin cambiar el significado. Los estados de foco y h
 
 ## Proyecto de demostración y contacto
 
-
 Dirección, coordenadas, teléfono, correo y URLs se centralizan en `app/landing-content.ts`. La ubicación de referencia proporcionada es Prol. 28 de Julio 581, Lurigancho-Chosica, Lima, Perú; coordenadas `-11.9391165, -76.6966084`.
 
 El mapa es un iframe de Google Maps con URL de inserción, carga diferida, título accesible y dimensiones responsive. Reemplaza la captura estática. «Cómo llegar» abre el enlace de ubicación proporcionado, incluso si el navegador bloquea el iframe. No utiliza API keys, SDK ni servicios de pago. La visualización depende de Google y de la conexión del visitante.

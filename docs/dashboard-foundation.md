@@ -1,6 +1,6 @@
 # Frontend interno
 
-Prototipo para un único gimnasio. Incluye las páginas internas de los cuatro perfiles del diseño. 
+Prototipo para un único gimnasio. Incluye las páginas internas de los cuatro perfiles del diseño.
 
 El recuento corresponde a los archivos `page.tsx` de `app/(interno)`: 5 páginas de administrador, 4 de recepción, 4 de entrenador y 4 de socio. `/login` es una ruta de acceso adicional; la landing pública tampoco forma parte del recuento interno.
 
@@ -37,7 +37,6 @@ Los grupos `(acceso)` e `(interno)` organizan rutas y layouts. `DashboardShell` 
 - `features/demo/`: contexto React que comparte el escenario entre páginas y perfiles. Está en el layout raíz para conservar cambios al salir al login y entrar con otra cuenta de prueba.
 - `mocks/`: entidades tipadas y datos iniciales relacionados mediante IDs.
 
-
 ## Interacciones
 
 Administración permite crear, consultar, editar y eliminar personal, clientes y productos del escenario. Los planes se crean, editan y activan o desactivan; no se eliminan. Los planes inactivos no están disponibles para nuevas matrículas. La asignación del entrenador se realiza desde la edición del cliente.
@@ -57,7 +56,6 @@ Referencia: [Imperium Cross en Figma](https://www.figma.com/design/5EPZT22l83oUz
 Se consultaron las páginas de administración `39:270`, `67:345`, `39:598`, `39:722`; recepción `36:80`, `42:1011`, `73:369`, `73:598`; entrenamiento `36:109`, `74:962`, `74:1350`, `74:1584`; socio `36:135`, `76:1885`, `78:2172`, `344:21`; login `88:188` y sus grupos de contenido. Se revisaron también los formularios y detalles de esas entidades. Los recursos originales se sirven desde `public/dashboard/`; los logos se reutilizan desde `public/landing/`. No hay URLs temporales de Figma en ejecución.
 
 Se conservan Inter, degradado rojo, sidebar de 233 px y cabecera de 121 px. Los recortes de imágenes se expresan en contenedores dimensionados; `Image` con `fill` no recibe `style.width`. Los ejercicios animados se sirven sin optimización.
-
 
 ## Verificaciones
 

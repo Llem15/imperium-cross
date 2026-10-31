@@ -2,7 +2,7 @@
 
 Imperium Cross es una aplicación para un único gimnasio. Se desarrolla como una sola aplicación con Next.js App Router y funcionalidades organizadas por dominio cuando existe código que lo justifique. La etapa actual es exclusivamente frontend, con datos de demostración y sin persistencia.
 
-El [frontend interno](dashboard-foundation.md) organiza rutas mediante grupos de acceso y paneles, componentes compartidos en `components/`, funcionalidades en `features/` y fixtures tipados en `mocks/`. Un contexto React conserva las modificaciones del escenario en memoria durante la navegación. Las rutas de los cuatro perfiles están abiertas: el login con cuentas solo organiza el recorrido de demostración. 
+El [frontend interno](dashboard-foundation.md) organiza rutas mediante grupos de acceso y paneles, componentes compartidos en `components/`, funcionalidades en `features/` y fixtures tipados en `mocks/`. Un contexto React conserva las modificaciones del escenario en memoria durante la navegación. Las rutas de los cuatro perfiles están abiertas: el login con cuentas solo organiza el recorrido de demostración.
 
 ## Responsabilidades y organización
 
