@@ -176,9 +176,6 @@ export function SocialLinks() {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-center text-xs text-footer-muted">
-        Facebook e Instagram: enlaces pendientes.
-      </p>
     </>
   );
 }
