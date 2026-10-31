@@ -111,7 +111,6 @@ export const plans = [
       "Rutinas personalizadas",
       "Seguimiento de progreso",
       "10% de descuento en nuestros productos",
-      "Calculadora nutricional",
     ],
   },
   {
@@ -124,7 +123,6 @@ export const plans = [
       "Seguimiento de progreso",
       "25% de descuento en nuestros productos",
       "Camiseta exclusiva + Estacionamiento free",
-      "Calculadora nutricional",
     ],
   },
 ] as const;

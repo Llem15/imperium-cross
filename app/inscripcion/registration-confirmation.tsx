@@ -6,16 +6,15 @@ import { plans } from "../landing-content";
 import { confirmationExample } from "./registration-model";
 import type { RegistrationPreview } from "./registration-model";
 
-// Esta pantalla es una vista previa local, no una confirmación de backend.
 export function RegistrationConfirmation({ preview }: { preview: RegistrationPreview }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const plan = plans.find((item) => item.id === preview.planId);
   const isCashPayment = preview.method === "cash";
   const icon = isCashPayment ? "cash" : "payment";
-  const title = isCashPayment ? "Vista previa del registro" : "Vista previa del pago";
+  const title = isCashPayment ? "Tu registro fue Guardado" : "¡Pago Exitoso!";
   const description = isCashPayment
-    ? "El pago presencial quedará pendiente hasta la confirmación en recepción."
-    : "Así se verá la confirmación de tu membresía cuando el pago esté validado.";
+    ? "Elegiste pagar en efectivo, tu matricula se activará cuando te acerques a Imperium Cross en Chosica."
+    : "Bienvenido(a) a Imperium Cross. Tu membresía ya está activa.";
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -72,7 +71,8 @@ export function RegistrationConfirmation({ preview }: { preview: RegistrationPre
         )}
       </dl>
       <p className="text-xs text-muted">
-        Esta vista previa no guarda datos, procesa pagos ni envía correos.
+        Te enviamos un correo con tus credenciales de acceso al sistema. Recuerda que si es Pago en
+        Efectivo, tu registro se activará cuando te acerques a Imperium Cross en Chosica.
       </p>
     </section>
   );

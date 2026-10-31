@@ -38,6 +38,7 @@ TikTok utiliza el perfil enlazado en el Linktree de referencia. Facebook e Insta
 - `app/landing-navigation.tsx`: única interacción local de cliente para el menú móvil.
 - `app/globals.css`: tokens de Tailwind CSS 4 y reglas globales de accesibilidad; la distribución y adaptación responsive usan utilidades en los componentes.
 - `app/layout.tsx`: idioma, metadatos e Inter mediante `next/font`.
+- `app/icon.png`: logo original de Imperium Cross como icono global de las pestañas; reemplaza el favicon genérico de Next.js mediante la convención de metadatos de App Router.
 
 Verificaciones requeridas antes de publicar: `npm run lint`, `npm run typecheck`, `npm run build` y `git diff --check`. Revisar además la ejecución e hidratación, imágenes, anclas, menú móvil, enlaces, mapa y capturas a 320, 390, 768, 1024 y 1440 px. No basta con compilar.
 
