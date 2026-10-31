@@ -1,12 +1,12 @@
 # Frontend interno
 
-Prototipo para un único gimnasio. Incluye las 17 páginas internas de los cuatro perfiles del diseño. Las interacciones modifican datos ficticios en memoria; recargar restaura el escenario inicial. No hay backend, base de datos, correo, autenticación, autorización ni procesamiento de pagos.
+Prototipo para un único gimnasio. Incluye las páginas internas de los cuatro perfiles del diseño. 
 
 El recuento corresponde a los archivos `page.tsx` de `app/(interno)`: 5 páginas de administrador, 4 de recepción, 4 de entrenador y 4 de socio. `/login` es una ruta de acceso adicional; la landing pública tampoco forma parte del recuento interno.
 
 ## Acceso y navegación
 
-`/login` acepta usuario o correo ficticio y una contraseña pública de prueba. Rechaza combinaciones incorrectas y lleva a la página inicial del perfil correspondiente. Las cuentas se muestran en el desplegable «Cuentas de demostración» del login:
+`/login` acepta usuario o correo y una contraseña pública de prueba. Rechaza combinaciones incorrectas y lleva a la página inicial del perfil correspondiente. Las cuentas se muestran en el desplegable «Cuentas de demostración» del login:
 
 | Perfil        | Usuario              | Contraseña de prueba |
 | ------------- | -------------------- | -------------------- |
@@ -37,13 +37,12 @@ Los grupos `(acceso)` e `(interno)` organizan rutas y layouts. `DashboardShell` 
 - `features/demo/`: contexto React que comparte el escenario entre páginas y perfiles. Está en el layout raíz para conservar cambios al salir al login y entrar con otra cuenta de prueba.
 - `mocks/`: entidades tipadas y datos iniciales relacionados mediante IDs.
 
-No hay servicios HTTP ficticios ni persistencia en navegador. Las fotos seleccionadas se leen localmente y no se suben a ningún servidor. Se aceptan PNG, JPG, WebP y GIF de hasta 5 MB. La landing y la inscripción pública conservan su estado y comportamiento independientes.
 
 ## Interacciones
 
 Administración permite crear, consultar, editar y eliminar personal, clientes y productos del escenario. Los planes se crean, editan y activan o desactivan; no se eliminan. Los planes inactivos no están disponibles para nuevas matrículas. La asignación del entrenador se realiza desde la edición del cliente.
 
-Recepción prepara registros pendientes o pagados de prueba y renovaciones. El formulario informa que no efectúa cobros reales. La asistencia comprueba membresía activa, pendiente o vencida y evita duplicar un ingreso en la misma fecha de prueba. La venta controla unidades disponibles, calcula el total y actualiza el stock local al confirmarse.
+Recepción prepara registros pendientes o pagados de prueba y renovaciones. La asistencia comprueba membresía activa, pendiente o vencida y evita duplicar un ingreso en la misma fecha de prueba. La venta controla unidades disponibles, calcula el total y actualiza el stock local al confirmarse.
 
 El entrenador consulta sus clientes, administra ejercicios, crea rutinas con series, repeticiones y descanso, y las asigna a sus socios. Las notas se crean o editan con fecha y texto. La rutina y el progreso del socio reflejan esos cambios al navegar sin recargar.
 
@@ -59,9 +58,6 @@ Se consultaron las páginas de administración `39:270`, `67:345`, `39:598`, `39
 
 Se conservan Inter, degradado rojo, sidebar de 233 px y cabecera de 121 px. Los recortes de imágenes se expresan en contenedores dimensionados; `Image` con `fill` no recibe `style.width`. Los ejercicios animados se sirven sin optimización.
 
-El diseño no especifica móvil: se adapta con sidebar modal, rejillas reorganizadas y desplazamiento de tablas dentro de su región. Los ejemplos repetidos de Figma se sustituyen por entidades distintas y estados vacíos. Se corrigen inconsistencias de texto y datos: duración de plan en días, sin DNI en el plan, búsqueda de ejercicios, etiqueta de vencimiento y precios coherentes con la landing. Se añade el selector de entrenador dentro del formulario de cliente para cubrir la asignación indicada por el diseño; Figma no define ese control. Los formularios de edición y eliminación reutilizan patrones existentes, dado que no todos tienen variantes propias.
-
-La recuperación de contraseña y las notificaciones no se han implementado. La campana sigue siendo decorativa. El login editable es una adaptación expresamente solicitada para usar cuentas y contraseñas ficticias. Los mensajes de operaciones internas de prueba evitan afirmar pagos, envíos o autenticación reales. No se modifica el recorrido visual de inscripción pública.
 
 ## Verificaciones
 

@@ -2,7 +2,7 @@
 
 Imperium Cross es una aplicación para un único gimnasio. Se desarrolla como una sola aplicación con Next.js App Router y funcionalidades organizadas por dominio cuando existe código que lo justifique. La etapa actual es exclusivamente frontend, con datos de demostración y sin persistencia.
 
-El [frontend interno](dashboard-foundation.md) organiza rutas mediante grupos de acceso y paneles, componentes compartidos en `components/`, funcionalidades en `features/` y fixtures tipados en `mocks/`. Un contexto React conserva las modificaciones del escenario en memoria durante la navegación. Las rutas de los cuatro perfiles están abiertas: el login con cuentas ficticias solo organiza el recorrido de demostración. No se implementan servicios de backend ni seguridad de acceso en esta etapa.
+El [frontend interno](dashboard-foundation.md) organiza rutas mediante grupos de acceso y paneles, componentes compartidos en `components/`, funcionalidades en `features/` y fixtures tipados en `mocks/`. Un contexto React conserva las modificaciones del escenario en memoria durante la navegación. Las rutas de los cuatro perfiles están abiertas: el login con cuentas solo organiza el recorrido de demostración. 
 
 ## Responsabilidades y organización
 
@@ -27,8 +27,6 @@ Los siguientes roles son una propuesta de alcance; sus permisos concretos deber�
 ## Seguridad y datos
 
 Autenticar y autorizar cada operación protegida en el servidor, incluidos Server Actions y Route Handlers. Validar entradas y comprobar permisos sobre los datos solicitados; ocultar controles en la interfaz no sustituye estas comprobaciones. Enviar al cliente únicamente los datos necesarios y no exponer secretos.
-
-PostgreSQL es la propuesta de base de datos, pendiente de aprobación e implementación. No hay ORM, esquema, migraciones ni conexión configurados. Las credenciales futuras se proporcionarán mediante variables de entorno excluidas de Git.
 
 ## Evolución progresiva
 

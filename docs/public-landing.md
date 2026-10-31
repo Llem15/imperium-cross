@@ -10,7 +10,6 @@ Se corrigen tildes evidentes sin cambiar el significado. Los estados de foco y h
 
 ## Proyecto de demostración y contacto
 
-El usuario confirmó que no es un proyecto real para el negocio: contactos, precios, horarios y testimonios son contenido de demostración, no información comercial validada. El aviso visible de demostración se retiró de la interfaz a petición del usuario. Antes de un uso real deben sustituirse o aprobarse los datos y contenidos de prueba.
 
 Dirección, coordenadas, teléfono, correo y URLs se centralizan en `app/landing-content.ts`. La ubicación de referencia proporcionada es Prol. 28 de Julio 581, Lurigancho-Chosica, Lima, Perú; coordenadas `-11.9391165, -76.6966084`.
 
