@@ -119,8 +119,7 @@ export function TrackingPage() {
           initialValues={{ date: note?.date ?? demoDate, text: note?.text ?? "" }}
           onClose={() => setEditing(null)}
           onSubmit={(values) => {
-            if (values.date > demoDate)
-              return "La fecha no puede ser posterior a la fecha del escenario de prueba.";
+            if (values.date > demoDate) return "La fecha no puede ser posterior a la fecha actual.";
             const next = {
               id: note?.id ?? newDemoId("note"),
               memberId: editing.member.id,

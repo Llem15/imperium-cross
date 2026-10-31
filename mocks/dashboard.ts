@@ -78,10 +78,10 @@ export const demoProfiles: readonly DemoProfile[] = [
 // Datos públicos y ficticios para la demostración; no son credenciales reales.
 export const demoPassword = "Imperium-demo";
 export const demoAccounts = [
-  { username: "lin.admin", email: "lin@example.test", role: "admin" },
-  { username: "milagros.recepcion", email: "milagros@example.test", role: "reception" },
-  { username: "pedro.entrenador", email: "pedro@example.test", role: "trainer" },
-  { username: "melani.cliente", email: "melani@example.test", role: "member" },
+  { username: "lin.admin", email: "lin@admin.com", role: "admin" },
+  { username: "milagros.recepcion", email: "milagros@recepcion.com", role: "reception" },
+  { username: "pedro.entrenador", email: "pedro@entrenador.com", role: "trainer" },
+  { username: "melani.cliente", email: "melani@gmail.com", role: "member" },
 ] as const;
 
 // Identidades y registros ficticios. La fecha fija evita resultados variables al renderizar.
@@ -109,7 +109,7 @@ export const members: readonly DemoMember[] = [
     id: demoMemberId,
     firstName: "Melani",
     lastName: "Camacho",
-    email: "melani@example.test",
+    email: "melani@gmail.com",
     planId: "premium",
     status: "active",
     trainerId: demoTrainerId,
@@ -123,7 +123,7 @@ export const members: readonly DemoMember[] = [
     id: "member-ana",
     firstName: "Ana",
     lastName: "Torres",
-    email: "ana@example.test",
+    email: "ana@gmail.com",
     planId: "basico",
     status: "active",
     trainerId: demoTrainerId,
@@ -136,7 +136,7 @@ export const members: readonly DemoMember[] = [
     id: "member-mario",
     firstName: "Mario",
     lastName: "Bautista",
-    email: "mario@example.test",
+    email: "mario@gmail.com",
     planId: "basico",
     status: "active",
     trainerId: demoTrainerId,
@@ -149,7 +149,7 @@ export const members: readonly DemoMember[] = [
     id: "member-milagros",
     firstName: "Milagros",
     lastName: "Leon",
-    email: "milagros@example.test",
+    email: "milagros@gmail.com",
     planId: "pro",
     status: "pending",
     trainerId: demoTrainerId,
@@ -162,7 +162,7 @@ export const members: readonly DemoMember[] = [
     id: "member-luis",
     firstName: "Luis",
     lastName: "Torres",
-    email: "luis@example.test",
+    email: "luis@gmail.com",
     planId: "premium",
     status: "active",
     trainerId: "trainer-other",

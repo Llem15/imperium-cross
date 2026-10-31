@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { SearchField, StatusBadge } from "@/components/dashboard/dashboard-ui";
 import {
   Button,
@@ -10,14 +10,15 @@ import {
   DataTable,
   Details,
   ManagementPanel,
-  Notice,
   RecordForm,
   RowAction,
 } from "@/components/dashboard/management-ui";
+import { Dialog } from "@/components/ui/dialog";
 import { useDemoData } from "@/features/demo/demo-provider";
+import { downloadSaleReceipt } from "@/features/products/sale-receipt";
 import { demoDate } from "@/mocks/dashboard";
 import { money, newDemoId, paymentLabels, productCategories } from "@/mocks/internal-data";
-import type { PaymentMethod, Product } from "@/mocks/internal-data";
+import type { PaymentMethod, Product, Sale } from "@/mocks/internal-data";
 
 function ProductImage({ product }: { product: Product }) {
   const crop =
@@ -224,6 +225,62 @@ export function ProductInventory() {
   );
 }
 
+function SaleConfirmation({ sale, onClose }: { sale: Sale; onClose: () => void }) {
+  const titleId = useId();
+  const [downloadError, setDownloadError] = useState(false);
+  return (
+    <Dialog open onClose={onClose} labelledBy={titleId}>
+      <Image
+        src="/registration/payment-confirmed.svg"
+        alt=""
+        width={60}
+        height={60}
+        className="mx-auto mb-4"
+      />
+      <h2
+        id={titleId}
+        data-dialog-heading
+        tabIndex={-1}
+        className="px-6 text-center text-xl font-bold focus:outline-none"
+      >
+        Venta registrada correctamente
+      </h2>
+      <div className="my-5 space-y-3 rounded-media bg-dashboard-canvas p-4 text-sm">
+        {sale.lines.map((line) => (
+          <p key={line.productId} className="flex justify-between gap-3">
+            <span>
+              {line.name} × {line.quantity}
+            </span>
+            <span>{money(line.cents * line.quantity)}</span>
+          </p>
+        ))}
+        <p className="flex justify-between gap-3 border-t border-line pt-3">
+          <span>Método de pago</span>
+          <span>{paymentLabels[sale.method]}</span>
+        </p>
+        <p className="flex justify-between gap-3 font-bold">
+          <span>Total</span>
+          <span>{money(sale.total)}</span>
+        </p>
+      </div>
+      {downloadError && (
+        <p role="alert" className="mb-3 text-caption text-brand-start">
+          No se pudo generar la constancia. Inténtalo de nuevo.
+        </p>
+      )}
+      <Button
+        className="w-full"
+        onClick={() => {
+          setDownloadError(false);
+          downloadSaleReceipt(sale).catch(() => setDownloadError(true));
+        }}
+      >
+        Descargar constancia
+      </Button>
+    </Dialog>
+  );
+}
+
 export function ProductCatalog({ reception = false }: { reception?: boolean }) {
   const { data, setData } = useDemoData();
   const [query, setQuery] = useState("");
@@ -232,7 +289,7 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [checkout, setCheckout] = useState(false);
   const [method, setMethod] = useState<PaymentMethod>("cash");
-  const [notice, setNotice] = useState("");
+  const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const products = data.products.filter(
     (product) =>
       (category === "Todos" || product.category === category) &&
@@ -265,7 +322,6 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
             </p>
           </div>
         )}
-        {notice && <Notice>{notice}</Notice>}
         <div
           className={`mt-5 grid gap-10 ${reception ? "grid-cols-[526fr_342fr] max-xl:grid-cols-1" : "grid-cols-1"}`}
         >
@@ -386,9 +442,6 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
             <p className="border-t border-line pt-3 font-bold">Total a pagar: {money(total)}</p>
           </div>
           <PaymentOptions value={method} onChange={setMethod} />
-          <Notice>
-            Vista de prueba: solo se actualiza el escenario local. No se realizará ningún cobro.
-          </Notice>
           <Button
             disabled={!lines.length}
             className="w-full"
@@ -417,14 +470,15 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
               }));
               setCart({});
               setCheckout(false);
-              setNotice(
-                "Venta de prueba registrada en el escenario local. No se realizó ningún cobro.",
-              );
+              setCompletedSale(sale);
             }}
           >
             Confirmar venta
           </Button>
         </Details>
+      )}
+      {completedSale && (
+        <SaleConfirmation sale={completedSale} onClose={() => setCompletedSale(null)} />
       )}
     </>
   );

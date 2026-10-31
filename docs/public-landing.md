@@ -14,7 +14,7 @@ Dirección, coordenadas, teléfono, correo y URLs se centralizan en `app/landing
 
 El mapa es un iframe de Google Maps con URL de inserción, carga diferida, título accesible y dimensiones responsive. Reemplaza la captura estática. «Cómo llegar» abre el enlace de ubicación proporcionado, incluso si el navegador bloquea el iframe. No utiliza API keys, SDK ni servicios de pago. La visualización depende de Google y de la conexión del visitante.
 
-Los enlaces de teléfono, correo y WhatsApp utilizan protocolos válidos. Son accesos externos: abrirlos no confirma recepción ni envía automáticamente mensajes. El teléfono de Figma coincide con el destino del [WhatsApp publicado en Linktree](https://linktr.ee/imperiumcross), comprobado durante la revisión. Se conserva el correo de Figma como dato de prueba por indicación del usuario.
+Los enlaces de teléfono, correo y WhatsApp utilizan protocolos válidos. Son accesos externos: abrirlos no confirma recepción ni envía automáticamente mensajes. El teléfono de Figma coincide con el destino del [WhatsApp publicado en Linktree](https://linktr.ee/imperiumcross), comprobado durante la revisión. Se conserva el correo de Figma como dato de ejemplo por indicación del usuario.
 
 ## Planes, formularios y redes
 

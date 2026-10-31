@@ -103,7 +103,7 @@ function ProfileMenu({ profile }: { profile: Profile }) {
         className="absolute top-full right-0 z-20 mt-3 w-60 max-w-[calc(100vw-32px)] rounded-media
           border border-line bg-white p-3 text-sm shadow-lg"
       >
-        <p className="px-3 py-2 text-xs text-muted">Cuenta de demostración · {profile.label}</p>
+        <p className="px-3 py-2 text-xs text-muted">Cuenta · {profile.label}</p>
         <Link
           href="/login"
           onClick={closeMenu}

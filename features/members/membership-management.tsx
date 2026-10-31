@@ -11,20 +11,11 @@ import {
   RowAction,
 } from "@/components/dashboard/management-ui";
 import { useDemoData } from "@/features/demo/demo-provider";
+import { downloadReceipt } from "@/features/members/payment-receipt";
 import { PaymentOptions } from "@/features/products/product-pages";
 import { demoDate, fullName, matchesMember } from "@/mocks/dashboard";
 import { addDays, membershipStatus, money, newDemoId, paymentLabels } from "@/mocks/internal-data";
 import type { Member, Payment, PaymentMethod } from "@/mocks/internal-data";
-
-export function downloadReceipt(payment: Payment, name: string, plan: string) {
-  const text = `IMPERIUM CROSS — COMPROBANTE DE EJEMPLO\nSin validez fiscal. No acredita una transacción real.\n\nCliente: ${name}\nPlan: ${plan}\nFecha: ${payment.date}\nImporte: ${money(payment.cents)}\nMétodo: ${paymentLabels[payment.method]}\nEstado de prueba: ${payment.status === "paid" ? "Pagado" : "Pendiente"}\n`;
-  const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `comprobante-ejemplo-${payment.id}.txt`;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 
 export function MembershipEditor({
   memberId,
@@ -81,11 +72,7 @@ export function MembershipEditor({
   return (
     <Details
       title={
-        saved
-          ? "Registro de prueba actualizado"
-          : memberMode
-            ? "Renovar membresía"
-            : "Registrar membresía"
+        saved ? "Registro actualizado" : memberMode ? "Renovar membresía" : "Registrar membresía"
       }
       onClose={onClose}
     >
@@ -149,10 +136,6 @@ export function MembershipEditor({
               Total: {plan ? money(plan.priceCents) : "—"}
             </p>
           </div>
-          <Notice>
-            Este formulario es un prototipo. Los botones solo modifican datos de prueba en esta
-            página.
-          </Notice>
           <div className="flex flex-wrap gap-3">
             {!memberMode && (
               <Button variant="outline" disabled={!member || !plan} onClick={() => save(false)}>
@@ -160,7 +143,7 @@ export function MembershipEditor({
               </Button>
             )}
             <Button disabled={!member || !plan} onClick={() => save(true)}>
-              {memberMode ? "Confirmar prueba" : "Cobrar (prueba)"}
+              {memberMode ? "Confirmar pago" : "Cobrar"}
             </Button>
           </div>
         </>
@@ -174,6 +157,7 @@ export function MembershipManagement() {
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [viewing, setViewing] = useState<Member | null>(null);
+  const [receiptError, setReceiptError] = useState(false);
   const rows = data.members.filter((member) => matchesMember(member, query));
   const paymentFor = (id: string) => data.payments.findLast((payment) => payment.memberId === id);
   const planName = (id: string) => data.plans.find((plan) => plan.id === id)?.name ?? "—";
@@ -191,6 +175,7 @@ export function MembershipManagement() {
           </>
         }
       >
+        {receiptError && <Notice>No se pudo generar el comprobante. Inténtalo de nuevo.</Notice>}
         <DataTable
           rows={rows}
           caption="Matrículas"
@@ -233,11 +218,14 @@ export function MembershipManagement() {
                   <RowAction
                     kind="download"
                     label={`Descargar comprobante de ${fullName(row)}`}
-                    disabled={!paymentFor(row.id)}
+                    disabled={paymentFor(row.id)?.status !== "paid"}
                     onClick={() => {
                       const payment = paymentFor(row.id);
-                      if (payment)
-                        downloadReceipt(payment, fullName(row), planName(payment.planId));
+                      if (payment?.status !== "paid") return;
+                      setReceiptError(false);
+                      downloadReceipt(payment, fullName(row), planName(payment.planId)).catch(() =>
+                        setReceiptError(true),
+                      );
                     }}
                   />
                 </div>

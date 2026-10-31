@@ -21,9 +21,7 @@ export function DemoLogin() {
       (item) => item.username === normalized || item.email === normalized,
     );
     if (!account || password !== demoPassword) {
-      setError(
-        "El usuario o la contraseña de prueba no coinciden. Consulta las cuentas de demostración.",
-      );
+      setError("El usuario o la contraseña no coinciden.");
       usernameRef.current?.focus();
       return;
     }
@@ -53,11 +51,7 @@ export function DemoLogin() {
             Imperium Cross
           </h1>
           <p className="mt-2.5 text-center text-sm text-muted">Bienvenido(a)</p>
-          <form
-            onSubmit={enterDemo}
-            className="mt-11.25"
-            aria-describedby="demo-access-description"
-          >
+          <form onSubmit={enterDemo} className="mt-11.25">
             <label htmlFor="demo-username" className="block font-bold">
               Usuario
             </label>
@@ -91,7 +85,7 @@ export function DemoLogin() {
                   setError("");
                 }}
                 autoComplete="off"
-                placeholder="Contraseña de prueba"
+                placeholder="Contraseña"
                 required
                 className={`${inputClasses} pr-12`}
               />
@@ -118,25 +112,6 @@ export function DemoLogin() {
             </button>
           </form>
         </section>
-        <div id="demo-access-description" className="mt-3 text-caption text-muted">
-          <p className="text-center">Prototipo frontend: utiliza únicamente cuentas ficticias.</p>
-          <details className="mt-2 rounded-control border border-dashboard-line bg-white p-3">
-            <summary className="cursor-pointer font-semibold">Cuentas de demostración</summary>
-            <ul className="mt-3 space-y-2">
-              {demoAccounts.map((account) => (
-                <li key={account.username}>
-                  <span className="font-semibold">
-                    {demoProfiles.find((profile) => profile.id === account.role)?.label}:
-                  </span>{" "}
-                  <code>{account.username}</code>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3">
-              Contraseña de prueba para todas: <code>{demoPassword}</code>
-            </p>
-          </details>
-        </div>
       </div>
     </main>
   );

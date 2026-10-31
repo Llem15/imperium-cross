@@ -6,14 +6,14 @@ El recuento corresponde a los archivos `page.tsx` de `app/(interno)`: 5 páginas
 
 ## Acceso y navegación
 
-`/login` acepta usuario o correo y una contraseña pública de prueba. Rechaza combinaciones incorrectas y lleva a la página inicial del perfil correspondiente. Las cuentas se muestran en el desplegable «Cuentas de demostración» del login:
+`/login` acepta usuario o correo y una contraseña pública. Rechaza combinaciones incorrectas y lleva a la página inicial del perfil correspondiente. Las cuentas no se muestran en el login:
 
-| Perfil        | Usuario              | Contraseña de prueba |
-| ------------- | -------------------- | -------------------- |
-| Administrador | `lin.admin`          | `Imperium-demo`      |
-| Recepción     | `milagros.recepcion` | `Imperium-demo`      |
-| Entrenador    | `pedro.entrenador`   | `Imperium-demo`      |
-| Socio         | `melani.cliente`     | `Imperium-demo`      |
+| Perfil        | Usuario              | Contraseña      |
+| ------------- | -------------------- | --------------- |
+| Administrador | `lin.admin`          | `Imperium-demo` |
+| Recepción     | `milagros.recepcion` | `Imperium-demo` |
+| Entrenador    | `pedro.entrenador`   | `Imperium-demo` |
+| Socio         | `melani.cliente`     | `Imperium-demo` |
 
 Estas cadenas son fixtures públicos, no secretos ni credenciales reales. No introducir cuentas personales. No se guardan contraseñas, cookies, tokens ni sesiones. Los registros de personal creados desde Usuarios no crean cuentas de acceso. La cabecera permite salir al login; no permite saltar directamente entre perfiles.
 
@@ -34,18 +34,18 @@ Los grupos `(acceso)` e `(interno)` organizan rutas y layouts. `DashboardShell` 
 - `components/ui/dialog.tsx`: diálogo nativo con Escape, cierre exterior, foco inicial, retorno al origen y bloqueo del scroll de fondo.
 - `features/access/`: formulario de acceso ficticio.
 - `features/administration/`, `features/members/`, `features/products/` y `features/training/`: páginas e interacciones por funcionalidad.
-- `features/demo/`: contexto React que comparte el escenario entre páginas y perfiles. Está en el layout raíz para conservar cambios al salir al login y entrar con otra cuenta de prueba.
+- `features/demo/`: contexto React que comparte el escenario entre páginas y perfiles. Está en el layout raíz para conservar cambios al salir al login y entrar con otra cuenta.
 - `mocks/`: entidades tipadas y datos iniciales relacionados mediante IDs.
 
 ## Interacciones
 
 Administración permite crear, consultar, editar y eliminar personal, clientes y productos del escenario. Los planes se crean, editan y activan o desactivan; no se eliminan. Los planes inactivos no están disponibles para nuevas matrículas. La asignación del entrenador se realiza desde la edición del cliente.
 
-Recepción prepara registros pendientes o pagados de prueba y renovaciones. La asistencia comprueba membresía activa, pendiente o vencida y evita duplicar un ingreso en la misma fecha de prueba. La venta controla unidades disponibles, calcula el total y actualiza el stock local al confirmarse.
+Recepción prepara registros pendientes o pagados y renovaciones. La asistencia comprueba membresía activa, pendiente o vencida y evita duplicar un ingreso en la misma fecha. La venta controla unidades disponibles, calcula el total y actualiza el stock local al confirmarse. Después muestra un resumen con la opción de descargar una constancia en PDF ficticia, generada en el navegador; al cerrar el resumen no se puede volver a descargar porque no hay historial de ventas en pantalla.
 
 El entrenador consulta sus clientes, administra ejercicios, crea rutinas con series, repeticiones y descanso, y las asigna a sus socios. Las notas se crean o editan con fecha y texto. La rutina y el progreso del socio reflejan esos cambios al navegar sin recargar.
 
-El socio consulta su perfil, asistencia, catálogo e historial. La renovación actualiza solo el escenario local. Los comprobantes descargables son archivos de texto marcados como ejemplos sin validez fiscal.
+El socio consulta su perfil, asistencia, catálogo e historial. La renovación actualiza solo el escenario local. Los comprobantes descargables son PDF ficticios generados en el navegador con `jspdf`, sin enviar datos a ningún servidor; la librería, el logo y las fuentes de `public/fonts/` se cargan solo al descargar.
 
 Los importes se guardan en céntimos. La fecha del escenario es `2026-12-07`, independiente del reloj del equipo. Los ingresos mensuales y la actividad inicial del dashboard son agregados ilustrativos; los contadores de socios se derivan del estado compartido.
 

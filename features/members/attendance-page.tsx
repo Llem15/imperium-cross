@@ -94,7 +94,7 @@ export function AttendancePage() {
       {open && (
         <Details title="Marcar asistencia" onClose={() => setOpen(false)}>
           <p className="mb-5 text-sm text-line">
-            Registro de ingreso al gimnasio · fecha de prueba: {demoDate}
+            Registro de ingreso al gimnasio · fecha: {demoDate}
           </p>
           <SearchField
             value={query}
@@ -138,7 +138,7 @@ export function AttendancePage() {
               </div>
               <Notice>
                 {duplicate
-                  ? "Este socio ya tiene un ingreso registrado para la fecha de prueba."
+                  ? "Este socio ya tiene un ingreso registrado para esta fecha."
                   : membershipStatus(member) === "active"
                     ? "Membresía vigente. Puede continuar con el registro de ingreso."
                     : membershipStatus(member) === "pending"
@@ -171,7 +171,7 @@ export function AttendancePage() {
               }));
               setDate(demoDate);
               setOpen(false);
-              setNotice(`Asistencia de prueba registrada para ${fullName(member)}.`);
+              setNotice(`Asistencia registrada para ${fullName(member)}.`);
             }}
           >
             Confirmar asistencia

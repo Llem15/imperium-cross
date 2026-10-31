@@ -13,7 +13,8 @@ import {
   RowAction,
 } from "@/components/dashboard/management-ui";
 import { useDemoData } from "@/features/demo/demo-provider";
-import { MembershipEditor, downloadReceipt } from "@/features/members/membership-management";
+import { MembershipEditor } from "@/features/members/membership-management";
+import { downloadReceipt } from "@/features/members/payment-receipt";
 import { PaymentOptions } from "@/features/products/product-pages";
 import { demoDate, demoMemberId, fullName } from "@/mocks/dashboard";
 import { membershipStatus, money, paymentLabels } from "@/mocks/internal-data";
@@ -175,6 +176,7 @@ export function MemberPayments() {
   const { data } = useDemoData();
   const [method, setMethod] = useState<PaymentMethod>("card");
   const [open, setOpen] = useState(false);
+  const [receiptError, setReceiptError] = useState(false);
   const member = data.members.find((item) => item.id === demoMemberId);
   const plan = data.plans.find((item) => item.id === member?.planId);
   const rows = data.payments.filter((item) => item.memberId === demoMemberId).toReversed();
@@ -200,9 +202,8 @@ export function MemberPayments() {
         </div>
         <details id="historial" open className="mt-10 rounded-media border border-line p-5">
           <summary className="cursor-pointer">Historial de pagos</summary>
-          <p className="mt-2 text-sm text-line">
-            Consulta el historial de prueba y descarga comprobantes de ejemplo.
-          </p>
+          <p className="mt-2 text-sm text-line">Consulta el historial y descarga comprobantes.</p>
+          {receiptError && <Notice>No se pudo generar el comprobante. Inténtalo de nuevo.</Notice>}
           <DataTable
             rows={rows}
             caption="Historial de pagos"
@@ -230,13 +231,15 @@ export function MemberPayments() {
                   <RowAction
                     kind="download"
                     label={`Descargar comprobante del ${row.date}`}
-                    onClick={() =>
+                    disabled={row.status !== "paid"}
+                    onClick={() => {
+                      setReceiptError(false);
                       downloadReceipt(
                         row,
                         member ? fullName(member) : "Socio",
                         data.plans.find((item) => item.id === row.planId)?.name ?? "—",
-                      )
-                    }
+                      ).catch(() => setReceiptError(true));
+                    }}
                   />
                 ),
               },

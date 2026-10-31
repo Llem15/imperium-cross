@@ -31,7 +31,7 @@ npm.cmd run dev
 
 Abrir [http://localhost:3000](http://localhost:3000).
 
-Para recorrer los paneles, abrir [el acceso de demostración](http://localhost:3000/login) y consultar las cuentas disponibles debajo del formulario. Introducir el usuario y la contraseña de prueba del perfil. Las rutas internas también pueden visitarse directamente; este acceso no proporciona autenticación real. Consultar [cuentas, rutas y limitaciones del frontend interno](docs/dashboard-foundation.md).
+Para recorrer los paneles, abrir [el acceso de demostración](http://localhost:3000/login) e introducir el usuario y la contraseña del perfil. Las rutas internas también pueden visitarse directamente; este acceso no proporciona autenticación real. Consultar [cuentas, rutas y limitaciones del frontend interno](docs/dashboard-foundation.md).
 
 Los comandos usan `npm.cmd` y `npx.cmd` para funcionar en PowerShell cuando la política de ejecución bloquea los scripts `.ps1`. En otras terminales se puede usar `npm` y `npx`.
 

@@ -439,8 +439,7 @@ export function ConfirmDelete({
   return (
     <Details title={`Eliminar ${title}`} onClose={onClose}>
       <p className="text-sm text-muted">
-        Se quitará del escenario local de demostración. Puedes recuperar el escenario inicial
-        recargando la página.
+        Se quitará del escenario local. Puedes recuperar el escenario inicial recargando la página.
       </p>
       <div className="mt-6 flex gap-3">
         <Button variant="outline" onClick={onClose}>
