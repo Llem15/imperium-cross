@@ -12,7 +12,6 @@ export type Applicant = {
 };
 export type ApplicantErrors = Partial<Record<keyof Applicant, string>>;
 
-
 export const trainingGoals = [
   "Mejorar mi condición física",
   "Ganar fuerza",
@@ -64,7 +63,7 @@ export type RegistrationPreview = {
   method: PaymentMethod;
 };
 
-// Valores de referencia 
+// Valores de referencia
 export const confirmationExample = {
   validUntil: "08/10/2026",
   attendanceCode: "#4821",

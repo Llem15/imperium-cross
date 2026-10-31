@@ -21,7 +21,6 @@ type Coach = PhotoContent & {
   specialty: string;
 };
 
-
 export const gym = {
   name: "Imperium Cross",
   address: "Prol. 28 de Julio 581, Lurigancho-Chosica, Lima, Perú.",

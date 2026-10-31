@@ -52,7 +52,7 @@ export async function downloadSaleReceipt(sale: Sale) {
     doc.setDrawColor(pdfColors.line).setLineWidth(0.3).line(margin, y, right, y);
   }
 
-  // total 
+  // total
   if (y + 26 > contentBottom) {
     doc.addPage();
     y = 12;
