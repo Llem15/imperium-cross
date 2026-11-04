@@ -40,3 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /AGENTS.md
+backend/src/main/resources/application.properties
