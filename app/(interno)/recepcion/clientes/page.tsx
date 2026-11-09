@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { ClientList } from "@/features/members/client-list";
+import { ApiClientList } from "@/features/members/api-client-list";
 
 export const metadata: Metadata = { title: "Clientes · Recepción | Imperium Cross" };
 
 export default function ReceptionClientsPage() {
-  return <ClientList mode="reception" />;
+  return <ApiClientList mode="reception" />;
 }

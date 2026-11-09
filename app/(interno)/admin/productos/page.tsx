@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { ProductInventory } from "@/features/products/product-pages";
+import { InventoryManager } from "@/features/products/inventory-manager";
 
 export const metadata: Metadata = { title: "Inventario | Imperium Cross" };
 
 export default function Page() {
-  return <ProductInventory />;
+  return <InventoryManager />;
 }

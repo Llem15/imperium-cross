@@ -13,6 +13,7 @@ type DialogProps = {
   drawer?: boolean;
   note?: boolean;
   narrow?: boolean;
+  wide?: boolean;
 };
 
 export function Dialog({
@@ -24,6 +25,7 @@ export function Dialog({
   drawer = false,
   note = false,
   narrow = false,
+  wide = false,
 }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -79,7 +81,7 @@ export function Dialog({
 
   const placement = drawer
     ? "fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-[min(280px,calc(100%-32px))] border-0 bg-ink p-0 text-white"
-    : `fixed m-auto max-h-[calc(100dvh-32px)] w-[calc(100%-24px)] ${note || narrow ? "max-w-registration" : "max-w-[595px]"} rounded-dialog border border-ink bg-white p-[44px] max-sm:p-6`;
+    : `fixed m-auto max-h-[calc(100dvh-32px)] w-[calc(100%-24px)] ${wide ? "max-w-[760px]" : note || narrow ? "max-w-registration" : "max-w-[595px]"} rounded-dialog border border-ink bg-white p-[44px] max-sm:p-6`;
 
   return (
     <dialog
