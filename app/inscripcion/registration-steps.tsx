@@ -109,7 +109,8 @@ export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantSte
             <input
               {...inputProps("phone")}
               className={controlClasses}
-              type="tel" inputMode="numeric"
+              type="tel"
+              inputMode="numeric"
               autoComplete="off"
               placeholder="999 999 999"
               maxLength={9}

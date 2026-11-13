@@ -10,7 +10,20 @@ const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:80
   "",
 );
 
-const monthLabels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const monthLabels = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
 
 type MembershipRow = { fechaInicio?: string; estadoMembresia?: string | null };
 type Summary = {
@@ -204,7 +217,9 @@ export function AdminDashboard() {
         setClients(parseApiClients(clientsBody));
         setMemberships(Array.isArray(membershipsBody) ? (membershipsBody as MembershipRow[]) : []);
         setSummary({
-          ingresosMensuales: Array.isArray(parsed.ingresosMensuales) ? parsed.ingresosMensuales : [],
+          ingresosMensuales: Array.isArray(parsed.ingresosMensuales)
+            ? parsed.ingresosMensuales
+            : [],
           actividad: Array.isArray(parsed.actividad) ? parsed.actividad : [],
         });
       } catch {

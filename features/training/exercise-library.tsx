@@ -210,11 +210,7 @@ export function ExerciseLibrary({ canCreate = false }: { canCreate?: boolean }) 
           ) : undefined
         }
       >
-        {error && (
-          <Notice>
-            {error} Vuelve a intentarlo en unos minutos.
-          </Notice>
-        )}
+        {error && <Notice>{error} Vuelve a intentarlo en unos minutos.</Notice>}
         {notice && <Notice>{notice}</Notice>}
         {loading && (
           <p role="status" className="mt-8 text-sm text-muted">

@@ -21,7 +21,19 @@ export function useRegistration(initialPlanId: PlanId) {
   const [completed, setCompleted] = useState(false);
 
   function updateField(name: keyof Applicant, value: string) {
-    const clean = name === "firstName" || name === "lastName" ? value.replace(/[^\p{L} ]/gu, "").replace(/ {2,}/g, " ").trimStart().slice(0, 30) : name === "phone" ? value.replace(/\D/g, "").slice(0, 9) : name === "dni" ? value.replace(/\D/g, "").slice(0, 8) : value; setData((current) => ({ ...current, [name]: clean }));
+    const clean =
+      name === "firstName" || name === "lastName"
+        ? value
+            .replace(/[^\p{L} ]/gu, "")
+            .replace(/ {2,}/g, " ")
+            .trimStart()
+            .slice(0, 30)
+        : name === "phone"
+          ? value.replace(/\D/g, "").slice(0, 9)
+          : name === "dni"
+            ? value.replace(/\D/g, "").slice(0, 8)
+            : value;
+    setData((current) => ({ ...current, [name]: clean }));
     setErrors((current) => ({ ...current, [name]: undefined }));
   }
 

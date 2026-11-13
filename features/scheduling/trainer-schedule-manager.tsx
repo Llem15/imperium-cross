@@ -167,8 +167,8 @@ export function TrainerScheduleManager() {
         </p>
       ) : trainers.length === 0 ? (
         <p role="status" className="mt-8 rounded-control bg-brand-surface p-5 text-sm">
-          No hay entrenadores activos. Registra o activa al personal con rol
-          Entrenador antes de configurar sus turnos.
+          No hay entrenadores activos. Registra o activa al personal con rol Entrenador antes de
+          configurar sus turnos.
         </p>
       ) : (
         <section className="mt-8">

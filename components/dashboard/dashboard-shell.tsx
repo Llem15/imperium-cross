@@ -96,7 +96,9 @@ function ProfileMenu({ profile }: { profile: Profile }) {
         className="flex cursor-pointer list-none items-center gap-3.75 rounded-control [&::-webkit-details-marker]:hidden"
       >
         <Image
-          src={photo.startsWith("data:") || photo.startsWith("http") ? photo : `/dashboard/${photo}`}
+          src={
+            photo.startsWith("data:") || photo.startsWith("http") ? photo : `/dashboard/${photo}`
+          }
           unoptimized
           alt=""
           width={50}

@@ -266,11 +266,7 @@ export function StaffManager() {
           </>
         }
       >
-        {error && (
-          <Notice>
-            {error} Vuelve a intentarlo en unos minutos.
-          </Notice>
-        )}
+        {error && <Notice>{error} Vuelve a intentarlo en unos minutos.</Notice>}
         {loading && (
           <p role="status" className="mt-8 text-sm text-muted">
             Cargando usuarios…

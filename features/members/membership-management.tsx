@@ -429,11 +429,7 @@ export function MembershipManagement() {
           </>
         }
       >
-        {loadError && (
-          <Notice>
-            {loadError} Vuelve a intentarlo en unos minutos.
-          </Notice>
-        )}
+        {loadError && <Notice>{loadError} Vuelve a intentarlo en unos minutos.</Notice>}
         {mutationError && <Notice>{mutationError}</Notice>}
         {success && <Notice>{success}</Notice>}
         {loading && (

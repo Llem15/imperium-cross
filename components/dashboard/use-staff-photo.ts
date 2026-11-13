@@ -35,9 +35,7 @@ export function useStaffPhoto(fullName: string): string | null {
         const person = (rows as StaffRow[]).find(
           (row) => `${row.nombres} ${row.apellidos}` === fullName && row.tieneFoto,
         );
-        setPhoto(
-          person ? `${apiBaseUrl}/api/usuarios/${person.idUsuario}/foto?v=${tick}` : null,
-        );
+        setPhoto(person ? `${apiBaseUrl}/api/usuarios/${person.idUsuario}/foto?v=${tick}` : null);
       } catch {}
     }
     void load();
