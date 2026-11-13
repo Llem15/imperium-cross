@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { benefits, coaches, facilities, heroCrop, testimonials } from "./landing-content";
+import { benefits, coaches, facilities, testimonials } from "./landing-content";
 import { LandingAction, LandingSection, Photo } from "./landing-ui";
 
 export function LandingHero() {
@@ -7,10 +7,10 @@ export function LandingHero() {
     <section
       data-ui="landing-hero"
       aria-labelledby="hero-title"
-      className="relative flex h-[1000px] items-center justify-center overflow-hidden
+      className="relative flex h-[789px] items-center justify-center overflow-hidden
         text-center text-white max-md:h-[620px]"
     >
-      <Photo name="hero" crop={heroCrop} preload />
+      <Photo name="hero" preload />
       <div className="absolute inset-0 bg-ink/30" />
       <div
         data-ui="hero-content"

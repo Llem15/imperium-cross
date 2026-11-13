@@ -18,5 +18,6 @@ public record ProductRequest(
         @NotBlank @Size(max = 15) String categoria,
         @NotNull @PositiveOrZero @Max(32767) Integer stock,
         @NotNull @PositiveOrZero @Max(32767) Integer stockMinimo,
-        @NotNull Boolean activo) {
+        @NotNull Boolean activo,
+        @Size(max = 8000000) String imagen) {
 }

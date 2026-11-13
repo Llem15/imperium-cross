@@ -45,8 +45,23 @@ export function overviewMetrics(currentMembers: readonly DemoMember[] = members)
 }
 
 export const recentActivity = [
-  { id: "activity-1", title: "Nuevo cliente", detail: fullName(members[3]), ago: "Hace 8 min" },
+  {
+    id: "activity-1",
+    title: "Nuevo cliente",
+    detail: members[3] ? fullName(members[3]) : "Cliente",
+    ago: "Hace 8 min",
+  },
   { id: "activity-2", title: "Venta registrada", detail: "Proteína Whey", ago: "Hace 21 min" },
-  { id: "activity-3", title: "Renovación", detail: fullName(members[1]), ago: "Hace 34 min" },
-  { id: "activity-4", title: "Rutina asignada", detail: fullName(members[0]), ago: "Hace 52 min" },
+  {
+    id: "activity-3",
+    title: "Renovación",
+    detail: members[1] ? fullName(members[1]) : "Cliente",
+    ago: "Hace 34 min",
+  },
+  {
+    id: "activity-4",
+    title: "Rutina asignada",
+    detail: members[0] ? fullName(members[0]) : "Cliente",
+    ago: "Hace 52 min",
+  },
 ];

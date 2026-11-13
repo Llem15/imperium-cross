@@ -4,6 +4,8 @@ export type ApiExercise = {
   descripcionEjercicio: string | null;
   grupoMuscular: string | null;
   dificultad: string | null;
+  indicaciones?: string | null;
+  tieneImagen?: boolean;
 };
 
 export type ApiRoutineExercise = {
@@ -40,7 +42,9 @@ function isApiExercise(value: unknown): value is ApiExercise {
     typeof exercise.nombreEjercicio === "string" &&
     isOptionalString(exercise.descripcionEjercicio) &&
     isOptionalString(exercise.grupoMuscular) &&
-    isOptionalString(exercise.dificultad)
+    isOptionalString(exercise.dificultad) &&
+    (exercise.indicaciones === undefined || isOptionalString(exercise.indicaciones)) &&
+    (exercise.tieneImagen === undefined || typeof exercise.tieneImagen === "boolean")
   );
 }
 

@@ -361,7 +361,7 @@ export function RoutineManagerApi() {
       fetch(`${apiBaseUrl}/api/ejercicios`, { signal, headers: { Accept: "application/json" } }),
     ]);
     if (!routineResponse.ok || !exerciseResponse.ok) {
-      throw new Error("No se pudieron cargar rutinas y ejercicios desde SQL Server.");
+      throw new Error("No se pudieron cargar rutinas y ejercicios.");
     }
     const [routinePayload, exercisePayload] = await Promise.all([
       routineResponse.json(),
@@ -446,9 +446,6 @@ export function RoutineManagerApi() {
               }}
             >
               + Nueva rutina
-            </Button>
-            <Button small variant="outline" onClick={() => void reload()}>
-              Actualizar
             </Button>
           </>
         }

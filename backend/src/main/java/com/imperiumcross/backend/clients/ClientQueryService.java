@@ -47,6 +47,7 @@ public class ClientQueryService {
                    u.dni,
                    u.telefono,
                    u.correo,
+                   CASE WHEN u.foto IS NULL THEN 0 ELSE 1 END AS tiene_foto,
                    c.fecha_nacimiento,
                    c.fecha_registro,
                    c.estado AS estado_cliente,
@@ -109,7 +110,8 @@ public class ClientQueryService {
                 nullableInt(rs, "id_rutina"),
                 rs.getString("nombre_rutina"),
                 nullableInt(rs, "id_entrenador"),
-                rs.getString("nombre_entrenador"));
+                rs.getString("nombre_entrenador"),
+                rs.getBoolean("tiene_foto"));
     };
 
     private final JdbcTemplate jdbcTemplate;
@@ -132,6 +134,7 @@ public class ClientQueryService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void create(ClientRequest client) {
         try {
+            ParsedPhoto photo = parsePhoto(client.foto());
             Integer roleId = jdbcTemplate.queryForObject(
                     "SELECT id_rol FROM dbo.Rol WHERE nombre_rol = ?",
                     Integer.class,
@@ -142,9 +145,9 @@ public class ClientQueryService {
 
             Integer userId = jdbcTemplate.queryForObject("""
                     INSERT INTO dbo.Usuario
-                        (nombres, apellidos, dni, telefono, correo, contrasena, id_rol)
+                        (nombres, apellidos, dni, telefono, correo, contrasena, id_rol, foto, tipo_foto)
                     OUTPUT INSERTED.id_usuario
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, Integer.class,
                     client.nombres().trim(),
                     client.apellidos().trim(),
@@ -152,7 +155,9 @@ public class ClientQueryService {
                     nullableVarchar(normalizePhone(client.telefono())),
                     client.correo().trim(),
                     passwordEncoder.encode(generateUnusablePassword()),
-                    roleId);
+                    roleId,
+                    new SqlParameterValue(Types.VARBINARY, photo.data()),
+                    new SqlParameterValue(Types.VARCHAR, photo.type()));
 
             Integer clientId = jdbcTemplate.queryForObject("""
                     INSERT INTO dbo.Cliente (id_usuario, fecha_nacimiento, objetivo)
@@ -191,6 +196,20 @@ public class ClientQueryService {
                     clientId);
             if (updatedUsers == 0) throw notFound();
 
+            if (client.foto() != null) {
+                ParsedPhoto photo = parsePhoto(client.foto());
+                jdbcTemplate.update("""
+                        UPDATE u
+                        SET u.foto = ?, u.tipo_foto = ?
+                        FROM dbo.Usuario u
+                        INNER JOIN dbo.Cliente c ON c.id_usuario = u.id_usuario
+                        WHERE c.id_cliente = ?
+                        """,
+                        new SqlParameterValue(Types.VARBINARY, photo.data()),
+                        new SqlParameterValue(Types.VARCHAR, photo.type()),
+                        clientId);
+            }
+
             jdbcTemplate.update("""
                     UPDATE dbo.Cliente
                     SET fecha_nacimiento = ?, objetivo = ?
@@ -226,6 +245,57 @@ public class ClientQueryService {
         jdbcTemplate.update(
                 "UPDATE dbo.AsignacionRutina SET estado = 0 WHERE id_cliente = ? AND estado = 1",
                 clientId);
+    }
+
+    private static final java.util.Set<String> ALLOWED_PHOTO_TYPES =
+            java.util.Set.of("image/png", "image/jpeg", "image/webp", "image/gif");
+    private static final int MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+    public record ClientPhoto(byte[] data, String type) {
+    }
+
+    private record ParsedPhoto(byte[] data, String type) {
+    }
+
+    public ClientPhoto findPhoto(int clientId) {
+        List<ClientPhoto> rows = jdbcTemplate.query("""
+                SELECT u.foto, u.tipo_foto
+                FROM dbo.Cliente c
+                INNER JOIN dbo.Usuario u ON u.id_usuario = c.id_usuario
+                WHERE c.id_cliente = ? AND u.foto IS NOT NULL
+                """,
+                (rs, rowNum) -> new ClientPhoto(rs.getBytes("foto"), rs.getString("tipo_foto")),
+                clientId);
+        if (rows.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El cliente no tiene foto.");
+        }
+        return rows.get(0);
+    }
+
+    private static ParsedPhoto parsePhoto(String raw) {
+        if (raw == null || raw.isBlank()) return new ParsedPhoto(null, null);
+        String value = raw.trim();
+        int separator = value.indexOf(";base64,");
+        if (!value.startsWith("data:") || separator < 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La foto no tiene un formato válido.");
+        }
+        String type = value.substring(5, separator);
+        if (!ALLOWED_PHOTO_TYPES.contains(type)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La foto debe ser PNG, JPG, WebP o GIF.");
+        }
+        byte[] data;
+        try {
+            data = Base64.getDecoder().decode(value.substring(separator + 8));
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La foto no se pudo leer.", exception);
+        }
+        if (data.length > MAX_PHOTO_BYTES) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La foto supera los 5 MB.");
+        }
+        return new ParsedPhoto(data, type);
     }
 
     private static String normalizePhone(String phone) {

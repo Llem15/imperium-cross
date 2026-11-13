@@ -164,7 +164,7 @@ export function AttendancePage() {
     <>
       <ManagementPanel
         title="Asistencia"
-        subtitle="Registro de ingresos validado con membresías activas en SQL Server"
+        subtitle="Registro de ingresos validado con membresías activas"
         actions={
           <>
             <label className="text-sm">

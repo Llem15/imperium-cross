@@ -78,7 +78,6 @@ export const demoProfiles: readonly DemoProfile[] = [
   },
 ];
 
-// DATOS DE PRUEBA
 export const demoPassword = "Imperium-demo";
 export const demoAccounts = [
   { username: "lin.admin", email: "lin@admin.com", role: "admin" },
@@ -87,7 +86,6 @@ export const demoAccounts = [
   { username: "melani.cliente", email: "melani@gmail.com", role: "member" },
 ] as const;
 
-// DATOS DE PRUEBA: FECHA Y MIEMBROS
 export const demoDate = "2026-12-07";
 export const demoTrainerId = "trainer-pedro";
 export const demoMemberId = "member-melani";
@@ -117,62 +115,10 @@ export const members: readonly DemoMember[] = [
     status: "active",
     trainerId: demoTrainerId,
     routineId: "routine-upper",
-    joinedOn: "2026-12-01",
+    joinedOn: "2026-10-01",
     expiresOn: "2026-12-12",
     objective: "Ganar masa muscular",
     portrait: "member-portrait.png",
-  },
-  {
-    id: "member-ana",
-    firstName: "Ana",
-    lastName: "Torres",
-    email: "ana@gmail.com",
-    planId: "basico",
-    status: "active",
-    trainerId: demoTrainerId,
-    routineId: "routine-upper",
-    joinedOn: "2026-11-15",
-    expiresOn: "2026-12-20",
-    objective: "Mejorar resistencia",
-  },
-  {
-    id: "member-mario",
-    firstName: "Mario",
-    lastName: "Bautista",
-    email: "mario@gmail.com",
-    planId: "basico",
-    status: "active",
-    trainerId: demoTrainerId,
-    routineId: "routine-upper",
-    joinedOn: "2026-12-02",
-    expiresOn: "2027-01-01",
-    objective: "Ganar fuerza",
-  },
-  {
-    id: "member-milagros",
-    firstName: "Milagros",
-    lastName: "Leon",
-    email: "milagros@gmail.com",
-    planId: "pro",
-    status: "pending",
-    trainerId: demoTrainerId,
-    routineId: null,
-    joinedOn: "2026-12-07",
-    expiresOn: null,
-    objective: "Mejorar condición física",
-  },
-  {
-    id: "member-luis",
-    firstName: "Luis",
-    lastName: "Torres",
-    email: "luis@gmail.com",
-    planId: "premium",
-    status: "active",
-    trainerId: "trainer-other",
-    routineId: null,
-    joinedOn: "2026-11-20",
-    expiresOn: "2026-12-30",
-    objective: "Mejorar condición física",
   },
 ];
 

@@ -5,5 +5,7 @@ public record ExerciseSummary(
         String nombreEjercicio,
         String descripcionEjercicio,
         String grupoMuscular,
-        String dificultad) {
+        String dificultad,
+        String indicaciones,
+        boolean tieneImagen) {
 }

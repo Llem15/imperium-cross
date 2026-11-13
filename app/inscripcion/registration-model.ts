@@ -28,30 +28,30 @@ export const paymentMethods = [
 export function validateApplicant(data: Applicant): ApplicantErrors {
   const errors: ApplicantErrors = {};
   const normalizedEmail = data.email.trim();
-  const normalizedPhone = data.phone.replace(/[\s()-]/g, "");
+  const normalizedPhone = data.phone.trim();
   const hasValidEmail =
     /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(normalizedEmail) && !data.email.includes("..");
-  const hasValidPhone = /^(?:\+51)?9\d{8}$/.test(normalizedPhone);
+  const hasValidPhone = /^9\d{8}$/.test(normalizedPhone);
   const hasValidDni = /^\d{8}$/.test(data.dni);
   const hasValidGoal = (trainingGoals as readonly string[]).includes(data.goal);
 
   if (!data.firstName.trim()) {
-    errors.firstName = "Ingresa tus nombres.";
+    errors.firstName = "Completa este campo con tus nombres.";
   }
   if (!data.lastName.trim()) {
-    errors.lastName = "Ingresa tus apellidos.";
+    errors.lastName = "Completa este campo con tus apellidos.";
   }
   if (!hasValidEmail) {
-    errors.email = "Ingresa un correo electrónico válido.";
+    errors.email = "Completa este campo con un correo válido.";
   }
   if (!hasValidPhone) {
-    errors.phone = "Ingresa un celular peruano de 9 dígitos; puedes incluir +51.";
+    errors.phone = "Completa este campo con 9 dígitos, empezando en 9.";
   }
   if (!hasValidDni) {
-    errors.dni = "El DNI debe tener exactamente 8 dígitos.";
+    errors.dni = "Completa este campo con los 8 dígitos de tu DNI.";
   }
   if (!hasValidGoal) {
-    errors.goal = "Selecciona tu objetivo de entrenamiento.";
+    errors.goal = "Selecciona una opción de la lista.";
   }
 
   return errors;

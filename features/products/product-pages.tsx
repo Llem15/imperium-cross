@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { SearchField, StatusBadge } from "@/components/dashboard/dashboard-ui";
 import {
   Button,
@@ -15,10 +15,16 @@ import {
 } from "@/components/dashboard/management-ui";
 import { Dialog } from "@/components/ui/dialog";
 import { useDemoData } from "@/features/demo/demo-provider";
+import { fetchProducts, postSale } from "@/features/products/catalog-api";
+import type { ApiProduct } from "@/features/products/catalog-api";
 import { downloadSaleReceipt } from "@/features/products/sale-receipt";
-import { demoDate } from "@/mocks/dashboard";
 import { money, newDemoId, paymentLabels, productCategories } from "@/mocks/internal-data";
 import type { PaymentMethod, Product, Sale } from "@/mocks/internal-data";
+
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(
+  /\/+$/,
+  "",
+);
 
 function ProductImage({ product }: { product: Product }) {
   const crop =
@@ -31,17 +37,22 @@ function ProductImage({ product }: { product: Product }) {
         <div
           className="absolute"
           style={
-            product.image.startsWith("data:")
+            product.image.startsWith("data:") || product.image.startsWith("http")
               ? { width: "100%", height: "100%", left: "0%", top: "0%" }
               : crop
           }
         >
           <Image
-            src={product.image.startsWith("data:") ? product.image : `/dashboard/${product.image}`}
+            src={
+              product.image.startsWith("data:") || product.image.startsWith("http")
+                ? product.image
+                : `/dashboard/${product.image}`
+            }
             alt=""
             fill
             sizes="200px"
-            className="object-fill"
+            unoptimized={product.image.startsWith("http")}
+            className={product.image.startsWith("http") ? "object-contain" : "object-fill"}
           />
         </div>
       ) : (
@@ -281,8 +292,45 @@ function SaleConfirmation({ sale, onClose }: { sale: Sale; onClose: () => void }
   );
 }
 
+function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .trim();
+}
+
+function matchCategory(category: string | null) {
+  if (!category) return "";
+  const key = normalizeText(category);
+  return (
+    productCategories.find((option) => {
+      const value = normalizeText(option);
+      return value === key || value.startsWith(key) || key.startsWith(value);
+    }) ?? category
+  );
+}
+
+function matchDemoImage(name: string, demoProducts: readonly Product[]) {
+  const words = normalizeText(name)
+    .split(/\s+/)
+    .filter((word) => word.length >= 4);
+  let best = { score: 0, image: "" };
+  for (const demo of demoProducts) {
+    if (!demo.image) continue;
+    const demoName = normalizeText(demo.name);
+    const score = words.filter((word) => demoName.includes(word)).length;
+    if (score > best.score) best = { score, image: demo.image };
+  }
+  return best.image;
+}
+
 export function ProductCatalog({ reception = false }: { reception?: boolean }) {
-  const { data, setData } = useDemoData();
+  const { data } = useDemoData();
+  const [apiProducts, setApiProducts] = useState<ApiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todos");
   const [viewing, setViewing] = useState<Product | null>(null);
@@ -290,12 +338,48 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
   const [checkout, setCheckout] = useState(false);
   const [method, setMethod] = useState<PaymentMethod>("cash");
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
-  const products = data.products.filter(
+  const [saving, setSaving] = useState(false);
+  const [saleError, setSaleError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchProducts(controller.signal)
+      .then((items) => {
+        setApiProducts(items);
+        setLoadError("");
+      })
+      .catch((cause) => {
+        if (controller.signal.aborted) return;
+        setLoadError(
+          cause instanceof Error ? cause.message : "No se pudieron cargar los productos.",
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [reloadKey]);
+
+  const catalog: Product[] = apiProducts
+    .filter((item) => item.activo)
+    .map((item) => ({
+      id: String(item.idProducto),
+      name: item.nombreProducto,
+      priceCents: Math.round(item.precio * 100),
+      category: matchCategory(item.categoria),
+      description: item.descripcionProducto ?? "",
+      stock: item.stock,
+      minimum: item.stockMinimo,
+      image: (item as ApiProduct & { tieneImagen?: boolean }).tieneImagen
+        ? `${apiBaseUrl}/api/productos/${item.idProducto}/imagen`
+        : matchDemoImage(item.nombreProducto, data.products),
+    }));
+  const products = catalog.filter(
     (product) =>
       (category === "Todos" || product.category === category) &&
       product.name.toLowerCase().includes(query.toLowerCase()),
   );
-  const lines = data.products
+  const lines = catalog
     .filter((product) => cart[product.id] > 0)
     .map((product) => ({ product, quantity: Math.min(cart[product.id], product.stock) }))
     .filter((line) => line.quantity > 0);
@@ -305,6 +389,41 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
       ...current,
       [product.id]: Math.max(0, Math.min(product.stock, (current[product.id] ?? 0) + amount)),
     }));
+  }
+  async function confirmSale() {
+    setSaving(true);
+    setSaleError("");
+    try {
+      const receipt = await postSale(
+        paymentLabels[method],
+        lines.map(({ product, quantity }) => ({
+          idProducto: Number(product.id),
+          cantidad: quantity,
+        })),
+      );
+      const now = new Date();
+      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const sale: Sale = {
+        id: `${receipt.serie}-${String(receipt.numero).padStart(6, "0")}`,
+        date,
+        method,
+        lines: lines.map(({ product, quantity }) => ({
+          productId: product.id,
+          name: product.name,
+          quantity,
+          cents: product.priceCents,
+        })),
+        total,
+      };
+      setCart({});
+      setCheckout(false);
+      setCompletedSale(sale);
+      setReloadKey((current) => current + 1);
+    } catch (cause) {
+      setSaleError(cause instanceof Error ? cause.message : "No se pudo registrar la venta.");
+    } finally {
+      setSaving(false);
+    }
   }
   return (
     <>
@@ -321,6 +440,11 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
               Todos los productos se adquieren en el gimnasio.
             </p>
           </div>
+        )}
+        {loadError && (
+          <p role="alert" className="mt-4 text-sm text-brand-start">
+            {loadError} Vuelve a intentarlo en unos minutos.
+          </p>
         )}
         <div
           className={`mt-5 grid gap-10 ${reception ? "grid-cols-[526fr_342fr] max-xl:grid-cols-1" : "grid-cols-1"}`}
@@ -368,7 +492,12 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
                 </article>
               ))}
             </div>
-            {products.length === 0 && (
+            {loading && (
+              <p role="status" className="py-10 text-sm text-muted">
+                Cargando productos…
+              </p>
+            )}
+            {!loading && !loadError && products.length === 0 && (
               <p role="status" className="py-10 text-sm text-muted">
                 No se encontraron productos.
               </p>
@@ -419,7 +548,13 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
                 <span>Total a pagar</span>
                 <strong>{money(total)}</strong>
               </p>
-              <Button disabled={!lines.length} onClick={() => setCheckout(true)}>
+              <Button
+                disabled={!lines.length}
+                onClick={() => {
+                  setSaleError("");
+                  setCheckout(true);
+                }}
+              >
                 Cobrar {money(total)}
               </Button>
             </section>
@@ -428,7 +563,7 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
       </ManagementPanel>
       {viewing && <ProductDetail product={viewing} onClose={() => setViewing(null)} />}
       {checkout && (
-        <Details title="Registro de venta" onClose={() => setCheckout(false)}>
+        <Details title="Registro de venta" onClose={() => !saving && setCheckout(false)}>
           <p className="text-center text-sm text-line">Punto de venta de productos</p>
           <div className="my-5 space-y-3 rounded-media bg-dashboard-canvas p-4 text-sm">
             {lines.map(({ product, quantity }) => (
@@ -442,38 +577,13 @@ export function ProductCatalog({ reception = false }: { reception?: boolean }) {
             <p className="border-t border-line pt-3 font-bold">Total a pagar: {money(total)}</p>
           </div>
           <PaymentOptions value={method} onChange={setMethod} />
-          <Button
-            disabled={!lines.length}
-            className="w-full"
-            onClick={() => {
-              const sale = {
-                id: newDemoId("sale"),
-                date: demoDate,
-                method,
-                lines: lines.map(({ product, quantity }) => ({
-                  productId: product.id,
-                  name: product.name,
-                  quantity,
-                  cents: product.priceCents,
-                })),
-                total,
-              };
-              setData((current) => ({
-                ...current,
-                sales: [...current.sales, sale],
-                products: current.products.map((product) => ({
-                  ...product,
-                  stock:
-                    product.stock -
-                    (lines.find((line) => line.product.id === product.id)?.quantity ?? 0),
-                })),
-              }));
-              setCart({});
-              setCheckout(false);
-              setCompletedSale(sale);
-            }}
-          >
-            Confirmar venta
+          {saleError && (
+            <p role="alert" className="mb-3 text-sm text-brand-start">
+              {saleError}
+            </p>
+          )}
+          <Button disabled={!lines.length || saving} className="w-full" onClick={confirmSale}>
+            {saving ? "Registrando…" : "Confirmar venta"}
           </Button>
         </Details>
       )}

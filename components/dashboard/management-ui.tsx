@@ -102,7 +102,11 @@ export function DataTable<T extends { id: string }>({
           <thead className="border-b border-line">
             <tr>
               {columns.map((column) => (
-                <th key={column.label} scope="col" className="pr-4 pb-1 font-normal">
+                <th
+                  key={column.label}
+                  scope="col"
+                  className="pr-3 pb-1 font-normal whitespace-nowrap"
+                >
                   {column.label}
                 </th>
               ))}
@@ -112,7 +116,7 @@ export function DataTable<T extends { id: string }>({
             {visible.map((row) => (
               <tr key={row.id} className="h-12 text-sm">
                 {columns.map((column) => (
-                  <td key={column.label} className="pr-4">
+                  <td key={column.label} className="pr-3">
                     {column.render(row)}
                   </td>
                 ))}
@@ -238,6 +242,8 @@ export type FormField = {
   maxLength?: number;
   minLength?: number;
   pattern?: string;
+  placeholder?: string;
+  allowed?: "digits" | "letters";
   autoComplete?: string;
 };
 
@@ -249,8 +255,11 @@ export function RecordForm({
   onClose,
   onSubmit,
   submitLabel = "Guardar",
+  header,
   extra,
   wide = false,
+  compact = false,
+  hideCancel = false,
 }: {
   title: string;
   subtitle?: string;
@@ -260,6 +269,9 @@ export function RecordForm({
   onSubmit: (values: FormValues) => string | void | Promise<string | void>;
   submitLabel?: string;
   extra?: ReactNode;
+  header?: ReactNode;
+  compact?: boolean;
+  hideCancel?: boolean;
   wide?: boolean;
 }) {
   const id = useId();
@@ -286,8 +298,7 @@ export function RecordForm({
       setSubmitting(false);
     }
   }
-  const control =
-    "mt-2 min-h-10 w-full min-w-0 rounded-control border border-muted bg-white px-3 py-2.5 text-sm focus:outline-2 focus:outline-brand-start";
+  const control = `${compact ? "mt-1.5 min-h-9 py-2" : "mt-2 min-h-10 py-2.5"} w-full min-w-0 rounded-control border border-muted bg-white px-3 text-sm focus:outline-2 focus:outline-brand-start`;
   return (
     <Dialog
       open
@@ -295,7 +306,13 @@ export function RecordForm({
       labelledBy={`${id}-title`}
       narrow={!wide}
       wide={wide}
-      className={wide ? "px-8 py-7 max-sm:px-5 max-sm:py-6" : "px-11.5 py-10 max-sm:px-6"}
+      className={
+        compact
+          ? "px-8 py-6 max-sm:px-5"
+          : wide
+            ? "px-8 py-7 max-sm:px-5 max-sm:py-6"
+            : "px-11.5 py-10 max-sm:px-6"
+      }
     >
       <h2
         id={`${id}-title`}
@@ -306,15 +323,33 @@ export function RecordForm({
         {title}
       </h2>
       {subtitle && <p className="mt-1.25 text-center text-sm text-line">{subtitle}</p>}
-      <form onSubmit={submit} className="mt-8">
-        <div className="grid grid-cols-2 gap-x-3 gap-y-3.5">
+      <form onSubmit={submit} className={compact ? "mt-4" : "mt-8"}>
+        {header}
+        <div
+          className={
+            compact ? "grid grid-cols-2 gap-x-3 gap-y-2.5" : "grid grid-cols-2 gap-x-3 gap-y-3.5"
+          }
+        >
           {fields.map((field) => {
             const fieldId = `${id}-${field.name}`;
             const common = {
               id: fieldId,
               value: values[field.name] ?? "",
               onChange: (event: { target: { value: string } }) => {
-                setValues({ ...values, [field.name]: event.target.value });
+                const raw = event.target.value;
+                const filtered =
+                  field.allowed === "digits"
+                    ? raw.replace(/\D/g, "")
+                    : field.allowed === "letters"
+                      ? raw
+                          .replace(/[^\p{L} ]/gu, "")
+                          .replace(/ {2,}/g, " ")
+                          .trimStart()
+                      : raw;
+                setValues({
+                  ...values,
+                  [field.name]: field.maxLength ? filtered.slice(0, field.maxLength) : filtered,
+                });
                 setError("");
               },
               required: field.required !== false,
@@ -392,6 +427,8 @@ export function RecordForm({
                     step={field.type === "number" ? "any" : undefined}
                     maxLength={field.maxLength}
                     pattern={field.pattern}
+                    placeholder={field.placeholder}
+                    inputMode={field.allowed === "digits" ? "numeric" : undefined}
                     autoComplete={field.autoComplete}
                   />
                 )}
@@ -405,10 +442,12 @@ export function RecordForm({
             {error}
           </p>
         )}
-        <div className="mt-7 flex gap-3">
-          <Button variant="outline" onClick={onClose} disabled={submitting} className="flex-1">
-            Cancelar
-          </Button>
+        <div className={compact ? "mt-5 flex gap-3" : "mt-7 flex gap-3"}>
+          {!hideCancel && (
+            <Button variant="outline" onClick={onClose} disabled={submitting} className="flex-1">
+              Cancelar
+            </Button>
+          )}
           <Button type="submit" disabled={submitting} className="flex-1">
             {submitting ? "Guardando…" : submitLabel}
           </Button>

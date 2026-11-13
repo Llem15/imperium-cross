@@ -4,7 +4,12 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.time.Duration;
+
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +34,21 @@ public class RoutineController {
     @GetMapping("/api/ejercicios")
     public List<ExerciseSummary> findExercises() {
         return routineQueryService.findExercises();
+    }
+
+    @GetMapping("/api/ejercicios/{id}/imagen")
+    public ResponseEntity<byte[]> exerciseImage(@PathVariable @Positive int id) {
+        RoutineQueryService.ExerciseImage image = routineQueryService.findExerciseImage(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(image.type()))
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)))
+                .body(image.data());
+    }
+
+    @PostMapping("/api/ejercicios")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ExerciseSummary createExercise(@Valid @RequestBody ExerciseRequest request) {
+        return routineQueryService.createExercise(request);
     }
 
     @GetMapping("/api/rutinas")

@@ -6,7 +6,7 @@ export type Exercise = {
   image: string;
   detailImage: string;
   crop: { width: string; height: string; left: string; top: string };
-  level: "Bajo" | "Medio" | "Alta";
+  level: "Bajo" | "Medio" | "Alto";
   description: string;
   instructions: string;
 };
@@ -53,7 +53,7 @@ export const routines: readonly {
 }[] = [
   {
     id: "routine-upper",
-    name: "Tren superior",
+    name: "Ganancia Muscular",
     // El frame muestra ocho tarjetas de dos ejercicioS
     prescriptions: Array.from({ length: 8 }, (_, index) => ({
       id: `prescription-${index + 1}`,
@@ -76,50 +76,38 @@ export const progressNotes: readonly ProgressNote[] = [
   {
     id: "note-1",
     memberId: demoMemberId,
-    date: "2026-12-07",
+    date: "2026-10-28",
     text: "Aumentaste 5 kg en press de banca. ¡Muy bien! Sigue así con tu rutina.",
   },
   {
     id: "note-2",
     memberId: demoMemberId,
-    date: "2026-12-04",
+    date: "2026-10-24",
     text: "Recomendación: mejorar la técnica de descenso y mantener los pies firmes.",
   },
   {
     id: "note-3",
     memberId: demoMemberId,
-    date: "2026-12-01",
+    date: "2026-10-20",
     text: "Buen control del movimiento en el remo con barra. Mantén la espalda neutra.",
   },
   {
     id: "note-4",
     memberId: demoMemberId,
-    date: "2026-11-28",
+    date: "2026-10-15",
     text: "Completaste todas las series con buena técnica y descansos regulares.",
   },
   {
     id: "note-5",
     memberId: demoMemberId,
-    date: "2026-11-25",
+    date: "2026-10-09",
     text: "Mejoró tu estabilidad durante los ejercicios de tren superior.",
   },
   {
     id: "note-6",
     memberId: demoMemberId,
-    date: "2026-11-21",
+    date: "2026-10-03",
     text: "Primera revisión de la rutina. Prioriza la técnica antes de aumentar la carga.",
-  },
-  {
-    id: "note-ana",
-    memberId: "member-ana",
-    date: "2026-12-04",
-    text: "Buena resistencia y recuperación entre series.",
-  },
-  {
-    id: "note-mario",
-    memberId: "member-mario",
-    date: "2026-12-03",
-    text: "Buen entrenamiento de fuerza; conserva el control de cada repetición.",
   },
 ];
 
