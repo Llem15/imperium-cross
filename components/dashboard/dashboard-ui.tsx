@@ -8,13 +8,20 @@ export function StatusBadge({
   status: "active" | "pending" | "expired";
   label?: string;
 }) {
-  const active = status === "active";
+  const neutral = label !== undefined && (label.startsWith("Sin") || label === "Inactivo");
+  const tone = neutral
+    ? { badge: "bg-gray-100 text-muted", dot: "bg-gray-400" }
+    : status === "active"
+      ? { badge: "bg-status-success-surface text-status-success", dot: "bg-status-success" }
+      : status === "expired"
+        ? { badge: "bg-red-100 text-brand-end", dot: "bg-brand-end" }
+        : { badge: "bg-status-pending-surface text-status-pending", dot: "bg-status-pending" };
   return (
     <span
-      className={`inline-flex min-h-6.25 items-center rounded-media px-2.5 py-0.75 text-sm
-      ${active ? "bg-status-success-surface text-status-success" : status === "expired" ? "bg-red-100 text-brand-end" : "bg-status-pending-surface text-status-pending"}`}
+      className={`inline-flex min-h-6.25 items-center gap-1.5 rounded-full px-2.5 py-0.75 text-sm whitespace-nowrap ${tone.badge}`}
     >
-      {label ?? (active ? "Activo" : status === "expired" ? "Vencida" : "Pendiente")}
+      <span aria-hidden="true" className={`size-1.5 rounded-full ${tone.dot}`} />
+      {label ?? (status === "active" ? "Activo" : status === "expired" ? "Vencida" : "Pendiente")}
     </span>
   );
 }

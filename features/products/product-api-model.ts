@@ -7,6 +7,7 @@ export type ApiProduct = {
   stock: number;
   stockMinimo: number;
   activo: boolean;
+  tieneImagen?: boolean;
 };
 
 function isApiProduct(value: unknown): value is ApiProduct {
@@ -29,7 +30,8 @@ function isApiProduct(value: unknown): value is ApiProduct {
     Number.isInteger(product.stockMinimo) &&
     product.stockMinimo >= 0 &&
     product.stockMinimo <= 32767 &&
-    typeof product.activo === "boolean"
+    typeof product.activo === "boolean" &&
+    (product.tieneImagen === undefined || typeof product.tieneImagen === "boolean")
   );
 }
 

@@ -10,5 +10,6 @@ public record ProductSummary(
         String categoria,
         int stock,
         int stockMinimo,
-        boolean activo) {
+        boolean activo,
+        boolean tieneImagen) {
 }

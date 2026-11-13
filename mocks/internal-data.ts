@@ -199,7 +199,7 @@ export const initialDemoData: DemoData = {
       image: "exercise-squat.png",
       detailImage: "exercise-squat.png",
       crop: { width: "224.38%", height: "133.97%", left: "-104.02%", top: "-28.81%" },
-      level: "Alta",
+      level: "Alto",
       category: "Fuerza",
       muscleGroup: "Piernas",
       description: "Ejercicio de tren inferior del catálogo.",
@@ -234,11 +234,7 @@ export const initialDemoData: DemoData = {
     status: member.status === "pending" ? "pending" : "paid",
     date: member.joinedOn,
   })),
-  attendance: [
-    { id: "attendance-1", memberId: "member-melani", date: demoDate, time: "07:30" },
-    { id: "attendance-2", memberId: "member-ana", date: demoDate, time: "09:15" },
-    { id: "attendance-3", memberId: "member-mario", date: "2026-12-06", time: "18:40" },
-  ],
+  attendance: [{ id: "attendance-1", memberId: "member-melani", date: demoDate, time: "07:30" }],
   sales: [],
 };
 

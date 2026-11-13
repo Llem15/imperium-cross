@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
@@ -30,8 +30,8 @@ export function RegistrationForm({ initialPlanId }: { initialPlanId: PlanId }) {
     <section
       data-ui="registration-card"
       aria-labelledby="registration-title"
-      className="min-h-[712px] w-full max-w-registration rounded-dialog border border-ink
-        bg-white p-[46px] text-ink max-compact:px-6 max-compact:py-8 max-small:px-4.5"
+      className="min-h-0 w-full max-w-registration rounded-dialog border border-ink
+        bg-white p-[32px] text-ink max-compact:px-6 max-compact:py-8 max-small:px-4.5"
     >
       <header
         data-ui="registration-heading"

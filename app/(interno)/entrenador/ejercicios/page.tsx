@@ -4,5 +4,5 @@ import { ExerciseLibrary } from "@/features/training/exercise-library";
 export const metadata: Metadata = { title: "Ejercicios | Imperium Cross" };
 
 export default function Page() {
-  return <ExerciseLibrary />;
+  return <ExerciseLibrary canCreate />;
 }

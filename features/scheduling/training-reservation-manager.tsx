@@ -298,16 +298,6 @@ export function TrainingReservationManager() {
     <ManagementPanel
       title="Reservas de entrenamiento"
       subtitle="Agenda recurrente de sesiones de 60 minutos. El sistema elige automáticamente al entrenador."
-      actions={
-        <Button
-          small
-          variant="outline"
-          disabled={loading || busy}
-          onClick={() => setReload((n) => n + 1)}
-        >
-          Actualizar
-        </Button>
-      }
     >
       <div className="mt-6 rounded-control border border-status-info bg-brand-surface p-4 text-sm">
         Esta gestión es administrativa. El socio aún no puede reservar directamente: el acceso
@@ -523,7 +513,7 @@ export function TrainingReservationManager() {
             role="status"
             className="mt-4 rounded-control border border-line p-5 text-sm text-muted"
           >
-            Todavía no hay reservas en SQL Server.
+            Todavía no hay reservas.
           </p>
         ) : (
           <div className="mt-4 max-w-full overflow-x-auto">

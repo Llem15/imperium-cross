@@ -19,7 +19,7 @@ const buttonClasses = [
 const actionsClasses = "mt-auto flex gap-5 pt-7.5 max-small:gap-3";
 const fieldsClasses = "flex flex-col gap-3.75";
 const rowClasses = "grid grid-cols-2 gap-3.75 max-small:gap-2.5";
-const formClasses = "mt-12.5 flex min-h-[490px] flex-col max-compact:mt-10";
+const formClasses = "mt-6 flex min-h-0 flex-col max-compact:mt-10";
 const labelClasses = "text-base font-bold max-compact:text-sm";
 
 type FieldProps = {
@@ -79,8 +79,8 @@ export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantSte
             <input
               {...inputProps("firstName")}
               className={controlClasses}
-              autoComplete="given-name"
-              placeholder="Ana Maria"
+              autoComplete="off"
+              placeholder=""
               maxLength={80}
             />
           </Field>
@@ -88,8 +88,8 @@ export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantSte
             <input
               {...inputProps("lastName")}
               className={controlClasses}
-              autoComplete="family-name"
-              placeholder="Torres Huaman"
+              autoComplete="off"
+              placeholder=""
               maxLength={80}
             />
           </Field>
@@ -100,7 +100,7 @@ export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantSte
             className={controlClasses}
             type="email"
             autoComplete="email"
-            placeholder="anatorres@correo.com"
+            placeholder="example@correo.com"
             maxLength={254}
           />
         </Field>
@@ -109,10 +109,10 @@ export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantSte
             <input
               {...inputProps("phone")}
               className={controlClasses}
-              type="tel"
-              autoComplete="tel"
+              type="tel" inputMode="numeric"
+              autoComplete="off"
               placeholder="999 999 999"
-              maxLength={20}
+              maxLength={9}
             />
           </Field>
           <Field name="dni" label="DNI" error={errors.dni}>
@@ -121,7 +121,7 @@ export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantSte
               className={controlClasses}
               inputMode="numeric"
               autoComplete="off"
-              placeholder="99999999"
+              placeholder="Nro. Documento"
               maxLength={8}
               pattern="[0-9]{8}"
             />

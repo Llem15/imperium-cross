@@ -24,5 +24,6 @@ public record ClientSummary(
         Integer idRutina,
         String nombreRutina,
         Integer idEntrenador,
-        String nombreEntrenador) {
+        String nombreEntrenador,
+        boolean tieneFoto) {
 }

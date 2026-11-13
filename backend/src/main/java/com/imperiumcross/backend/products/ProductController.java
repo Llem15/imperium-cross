@@ -4,7 +4,10 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +33,15 @@ public class ProductController {
     @GetMapping
     public List<ProductSummary> findAll() {
         return productQueryService.findAll();
+    }
+
+    @GetMapping("/{id}/imagen")
+    public ResponseEntity<byte[]> image(@PathVariable @Positive int id) {
+        ProductQueryService.ProductImage image = productQueryService.findImage(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(image.type()))
+                .cacheControl(CacheControl.noCache())
+                .body(image.data());
     }
 
     @PostMapping

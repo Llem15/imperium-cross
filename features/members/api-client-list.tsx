@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { useEffect, useId, useMemo, useState } from "react";
+import { PhotoPicker } from "@/components/dashboard/photo-picker";
+import { Dialog } from "@/components/ui/dialog";
 import {
   Button,
   DataTable,
@@ -14,11 +17,17 @@ import type { FormField, FormValues } from "@/components/dashboard/management-ui
 import { SearchField, StatusBadge } from "@/components/dashboard/dashboard-ui";
 import { getApiMembershipStatus, parseApiClients } from "./client-api-model";
 import type { ApiClient } from "./client-api-model";
+import { demoProfiles } from "@/mocks/dashboard";
 
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(
   /\/+$/,
   "",
 );
+
+function demoAvatarFor(client: ApiClient) {
+  return demoProfiles.find((profile) => profile.name === `${client.nombres} ${client.apellidos}`)
+    ?.avatar;
+}
 
 export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
   const [clients, setClients] = useState<ApiClient[]>([]);
@@ -27,6 +36,10 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
   const [editing, setEditing] = useState<ApiClient | "new" | null>(null);
+  const [viewing, setViewing] = useState<ApiClient | null>(null);
+  const [photo, setPhoto] = useState("");
+  const [photoChanged, setPhotoChanged] = useState(false);
+  const viewTitleId = useId();
   const [deactivating, setDeactivating] = useState<ApiClient | null>(null);
   const [mutationLoading, setMutationLoading] = useState(false);
   const [mutationError, setMutationError] = useState("");
@@ -73,17 +86,39 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
   }, [clients, query]);
 
   const fields: FormField[] = [
-    { name: "nombres", label: "Nombres", maxLength: 30 },
-    { name: "apellidos", label: "Apellidos", maxLength: 30 },
-    { name: "dni", label: "DNI", pattern: "[0-9]{8}", maxLength: 8 },
+    { name: "nombres", label: "Nombre", maxLength: 30, allowed: "letters", autoComplete: "off" },
+    {
+      name: "apellidos",
+      label: "Apellido",
+      maxLength: 30,
+      allowed: "letters",
+      autoComplete: "off",
+    },
+    {
+      name: "dni",
+      label: "DNI",
+      pattern: "[0-9]{8}",
+      maxLength: 8,
+      allowed: "digits",
+      autoComplete: "off",
+    },
     {
       name: "telefono",
       label: "Teléfono",
       pattern: "[0-9]{9}",
       maxLength: 9,
+      allowed: "digits",
+      autoComplete: "off",
       required: false,
     },
-    { name: "correo", label: "Correo electrónico", type: "email", maxLength: 50, wide: true },
+    {
+      name: "correo",
+      label: "Correo electrónico",
+      type: "email",
+      maxLength: 50,
+      wide: true,
+      autoComplete: "off",
+    },
     {
       name: "objetivo",
       label: "Objetivo elegido por el cliente",
@@ -114,6 +149,7 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
       correo: values.correo,
       fechaNacimiento: currentClient?.fechaNacimiento ?? null,
       objetivo: values.objetivo,
+      foto: photoChanged ? photo : undefined,
     };
     const response = await fetch(
       creating ? `${apiBaseUrl}/api/clientes` : `${apiBaseUrl}/api/clientes/${clientId}`,
@@ -142,15 +178,15 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
             if (validationMessages.length > 0) detail = validationMessages.join("; ");
           }
         }
-      } catch {
-        // Keep the HTTP status message when the server does not return a problem document.
-      }
+      } catch {}
       throw new Error(detail);
     }
 
     setEditing(null);
     setReload((current) => current + 1);
   }
+
+  const viewingStatus = viewing ? getApiMembershipStatus(viewing) : null;
 
   async function deactivateClient() {
     if (!deactivating) return;
@@ -178,11 +214,7 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
     <>
       <ManagementPanel
         title="Clientes"
-        subtitle={
-          mode === "admin"
-            ? "Clientes guardados en SQL Server"
-            : "Registro de clientes guardados en SQL Server"
-        }
+        subtitle="Registro de clientes"
         actions={
           <>
             <SearchField
@@ -190,23 +222,22 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
               onChange={setQuery}
               label="Buscar por nombre, DNI o correo"
             />
-            <Button small onClick={() => setEditing("new")}>
+            <Button
+              small
+              onClick={() => {
+                setPhoto("");
+                setPhotoChanged(false);
+                setEditing("new");
+              }}
+            >
               + Agregar cliente
             </Button>
-            <button
-              type="button"
-              onClick={() => setReload((current) => current + 1)}
-              disabled={loading}
-              className="min-h-9.5 rounded-media border border-brand-end px-3 text-sm text-brand-start disabled:opacity-50"
-            >
-              Actualizar
-            </button>
           </>
         }
       >
         {error && (
           <Notice>
-            {error} Verifica que Spring Boot esté iniciado y pueda conectarse a SQL Server.
+            {error} Vuelve a intentarlo en unos minutos.
           </Notice>
         )}
         {loading && (
@@ -217,30 +248,60 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
         {!loading && !error && (
           <DataTable
             rows={rows.map((client) => ({ ...client, id: String(client.idCliente) }))}
-            caption="Clientes registrados en SQL Server"
+            caption="Clientes registrados"
+            minWidth={640}
             columns={[
-              { label: "Nombres", render: (client) => client.nombres },
-              { label: "Apellidos", render: (client) => client.apellidos },
+              {
+                label: "Cliente",
+                render: (client) => (
+                  <div className="leading-tight">
+                    <p className="font-bold">
+                      {client.nombres} {client.apellidos}
+                    </p>
+                  </div>
+                ),
+              },
               { label: "DNI", render: (client) => client.dni },
-              { label: "Correo", render: (client) => client.correo },
-              { label: "Objetivo", render: (client) => client.objetivo ?? "Pendiente" },
+              {
+                label: "Objetivo",
+                render: (client) =>
+                  client.objetivo ?? <span className="text-muted">Sin definir</span>,
+              },
               {
                 label: "Rutina / entrenador",
                 render: (client) =>
-                  client.nombreRutina
-                    ? `${client.nombreRutina} / ${client.nombreEntrenador ?? "Sin entrenador"}`
-                    : "Pendiente de asignación",
+                  client.nombreRutina ? (
+                    <div className="leading-tight">
+                      <p className="font-bold">{client.nombreRutina}</p>
+                      <p className="text-caption text-muted">
+                        {client.nombreEntrenador ?? "Sin entrenador"}
+                      </p>
+                    </div>
+                  ) : (
+                    <span className="text-muted">Sin asignar</span>
+                  ),
               },
               {
                 label: "Membresía",
-                render: (client) => client.nombrePlan ?? "Sin membresía",
+                render: (client) =>
+                  client.nombrePlan ? (
+                    <span className="font-bold">{client.nombrePlan}</span>
+                  ) : (
+                    <span className="text-muted">—</span>
+                  ),
               },
               {
-                label: "Vencimiento",
+                label: "Vence",
                 render: (client) =>
-                  client.fechaFinMembresia
-                    ? new Date(`${client.fechaFinMembresia}T00:00:00`).toLocaleDateString("es-PE")
-                    : "—",
+                  client.fechaFinMembresia ? (
+                    new Date(`${client.fechaFinMembresia}T00:00:00`).toLocaleDateString("es-PE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "2-digit",
+                    })
+                  ) : (
+                    <span className="text-muted">—</span>
+                  ),
               },
               {
                 label: "Estado",
@@ -252,11 +313,24 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
               {
                 label: "Acciones",
                 render: (client) => (
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
+                    <RowAction
+                      kind="view"
+                      label={`Ver a ${client.nombres} ${client.apellidos}`}
+                      onClick={() => setViewing(client)}
+                    />
                     <RowAction
                       kind="edit"
                       label={`Editar a ${client.nombres} ${client.apellidos}`}
-                      onClick={() => setEditing(client)}
+                      onClick={() => {
+                        setPhoto(
+                          client.tieneFoto
+                            ? `${apiBaseUrl}/api/clientes/${client.idCliente}/foto`
+                            : "",
+                        );
+                        setPhotoChanged(false);
+                        setEditing(client);
+                      }}
                     />
                     {mode === "admin" && client.estadoCliente && client.estadoUsuario && (
                       <RowAction
@@ -278,7 +352,18 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
       {editing && (
         <RecordForm
           title={editing === "new" ? "Agregar cliente" : "Editar cliente"}
-          wide
+          header={
+            <PhotoPicker
+              value={photo}
+              onChange={(value) => {
+                setPhoto(value);
+                setPhotoChanged(true);
+              }}
+            />
+          }
+          compact
+          hideCancel
+          submitLabel={editing === "new" ? "Agregar" : "Guardar"}
           fields={fields}
           initialValues={
             editing === "new"
@@ -296,13 +381,88 @@ export function ApiClientList({ mode }: { mode: "admin" | "reception" }) {
           onSubmit={submitClient}
         />
       )}
+      {viewing && viewingStatus && (
+        <Dialog open onClose={() => setViewing(null)} labelledBy={viewTitleId} className="py-8">
+          <div className="relative mx-auto grid size-28 place-items-center overflow-hidden rounded-full bg-dashboard-canvas text-2xl font-bold text-muted">
+            {viewing.tieneFoto || demoAvatarFor(viewing) ? (
+              <Image
+                src={
+                  viewing.tieneFoto
+                    ? `${apiBaseUrl}/api/clientes/${viewing.idCliente}/foto`
+                    : `/dashboard/${demoAvatarFor(viewing)}`
+                }
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            ) : (
+              <span aria-hidden="true">
+                {`${viewing.nombres.charAt(0)}${viewing.apellidos.charAt(0)}`.toUpperCase()}
+              </span>
+            )}
+          </div>
+          <h2
+            id={viewTitleId}
+            data-dialog-heading
+            tabIndex={-1}
+            className="mt-4 mb-5 text-center text-xl font-bold focus:outline-none"
+          >
+            {viewing.nombres} {viewing.apellidos}
+          </h2>
+          <dl className="grid grid-cols-2 gap-x-3 gap-y-4 text-sm">
+            <div className="col-span-2">
+              <dt className="text-muted">Correo electrónico</dt>
+              <dd className="mt-1 break-all">{viewing.correo}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">DNI</dt>
+              <dd className="mt-1">{viewing.dni}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Teléfono</dt>
+              <dd className="mt-1">{viewing.telefono ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Objetivo</dt>
+              <dd className="mt-1">{viewing.objetivo ?? "Sin definir"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Estado</dt>
+              <dd className="mt-1">
+                <StatusBadge status={viewingStatus.status} label={viewingStatus.label} />
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted">Membresía</dt>
+              <dd className="mt-1">{viewing.nombrePlan ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Vence</dt>
+              <dd className="mt-1">
+                {viewing.fechaFinMembresia
+                  ? new Date(`${viewing.fechaFinMembresia}T00:00:00`).toLocaleDateString("es-PE")
+                  : "—"}
+              </dd>
+            </div>
+            <div className="col-span-2">
+              <dt className="text-muted">Rutina / entrenador</dt>
+              <dd className="mt-1">
+                {viewing.nombreRutina
+                  ? `${viewing.nombreRutina} · ${viewing.nombreEntrenador ?? "Sin entrenador"}`
+                  : "Sin asignar"}
+              </dd>
+            </div>
+          </dl>
+        </Dialog>
+      )}
       {deactivating && (
         <Details
           title={`Desactivar ${deactivating.nombres} ${deactivating.apellidos}`}
           onClose={() => !mutationLoading && setDeactivating(null)}
         >
           <p className="text-sm text-muted">
-            Se marcará como inactivo en la base de datos. No se eliminarán sus pagos ni membresías.
+            Se marcará como inactivo. No se eliminarán sus pagos ni membresías.
           </p>
           {mutationError && (
             <p role="alert" className="mt-4 text-sm text-brand-start">

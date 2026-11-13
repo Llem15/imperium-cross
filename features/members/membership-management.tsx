@@ -411,7 +411,7 @@ export function MembershipManagement() {
     <>
       <ManagementPanel
         title="Matrículas"
-        subtitle="Membresías y pagos guardados en SQL Server"
+        subtitle="Membresías y pagos"
         actions={
           <>
             <SearchField value={query} onChange={setQuery} />
@@ -431,7 +431,7 @@ export function MembershipManagement() {
       >
         {loadError && (
           <Notice>
-            {loadError} Verifica que Spring Boot esté iniciado y conectado a SQL Server.
+            {loadError} Vuelve a intentarlo en unos minutos.
           </Notice>
         )}
         {mutationError && <Notice>{mutationError}</Notice>}

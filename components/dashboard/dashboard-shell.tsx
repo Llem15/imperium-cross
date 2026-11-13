@@ -1,5 +1,7 @@
 "use client";
 
+import { useDemoData } from "@/features/demo/demo-provider";
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -7,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { demoProfiles } from "@/mocks/dashboard";
 import { Dialog } from "@/components/ui/dialog";
+import { useStaffPhoto } from "@/components/dashboard/use-staff-photo";
 
 type Profile = (typeof demoProfiles)[number];
 
@@ -64,6 +67,15 @@ function Sidebar({ profile, onNavigate }: { profile: Profile; onNavigate?: () =>
 }
 
 function ProfileMenu({ profile }: { profile: Profile }) {
+  const { data } = useDemoData();
+  const memberPerson = data.members.find(
+    (item) => `${item.firstName} ${item.lastName}` === profile.name,
+  );
+  const apiPhoto = useStaffPhoto(profile.name);
+  const photo =
+    apiPhoto ??
+    (memberPerson?.portrait?.startsWith("data:") ? memberPerson.portrait : undefined) ??
+    profile.avatar;
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
   function closeMenu() {
@@ -84,11 +96,12 @@ function ProfileMenu({ profile }: { profile: Profile }) {
         className="flex cursor-pointer list-none items-center gap-3.75 rounded-control [&::-webkit-details-marker]:hidden"
       >
         <Image
-          src={`/dashboard/${profile.avatar}`}
+          src={photo.startsWith("data:") || photo.startsWith("http") ? photo : `/dashboard/${photo}`}
+          unoptimized
           alt=""
           width={50}
           height={50}
-          className="shrink-0 rounded-full max-sm:size-10"
+          className="size-12.5 shrink-0 rounded-full object-cover max-sm:size-10"
         />
         <span className="min-w-0 text-sm">
           <span className="block truncate">{profile.name}</span>

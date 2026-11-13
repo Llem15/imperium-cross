@@ -143,7 +143,7 @@ export function PlansManager() {
     <>
       <ManagementPanel
         title="Membresías"
-        subtitle="Gestión de planes guardados en SQL Server"
+        subtitle="Gestión de planes"
         actions={
           <Button
             small

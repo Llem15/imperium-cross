@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class RoutineQueryService {
+
+    private static final java.util.Set<String> ALLOWED_IMAGE_TYPES =
+            java.util.Set.of("image/png", "image/jpeg", "image/webp", "image/gif");
+    private static final int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
     private final JdbcTemplate jdbcTemplate;
     private final TrainingAssignmentService trainingAssignmentService;
@@ -34,7 +39,9 @@ public class RoutineQueryService {
                        nombre_ejercicio,
                        descripcion_ejercicio,
                        grupo_muscular,
-                       dificultad
+                       dificultad,
+                       indicaciones,
+                       CASE WHEN imagen IS NULL THEN 0 ELSE 1 END AS tiene_imagen
                 FROM dbo.Ejercicio
                 WHERE estado = 1
                 ORDER BY nombre_ejercicio
@@ -44,7 +51,82 @@ public class RoutineQueryService {
                         rs.getString("nombre_ejercicio"),
                         rs.getString("descripcion_ejercicio"),
                         rs.getString("grupo_muscular"),
-                        rs.getString("dificultad")));
+                        rs.getString("dificultad"),
+                        rs.getString("indicaciones"),
+                        rs.getBoolean("tiene_imagen")));
+    }
+
+    public ExerciseSummary createExercise(ExerciseRequest request) {
+        String name = request.nombreEjercicio().trim();
+        String group = request.grupoMuscular().trim();
+        String description = nullableDescription(request.descripcionEjercicio());
+        String instructions = nullableDescription(request.indicaciones());
+        byte[] image = null;
+        String imageType = null;
+        if (request.imagen() != null && !request.imagen().isBlank()) {
+            String raw = request.imagen().trim();
+            int separator = raw.indexOf(";base64,");
+            if (!raw.startsWith("data:") || separator < 0) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "La imagen no tiene un formato válido.");
+            }
+            imageType = raw.substring(5, separator);
+            if (!ALLOWED_IMAGE_TYPES.contains(imageType)) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "La imagen debe ser PNG, JPG, WebP o GIF.");
+            }
+            try {
+                image = java.util.Base64.getDecoder().decode(raw.substring(separator + 8));
+            } catch (IllegalArgumentException exception) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "La imagen no se pudo leer.", exception);
+            }
+            if (image.length > MAX_IMAGE_BYTES) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "La imagen supera los 5 MB.");
+            }
+        }
+        try {
+            Integer id = jdbcTemplate.queryForObject("""
+                    INSERT INTO dbo.Ejercicio
+                        (nombre_ejercicio, descripcion_ejercicio, grupo_muscular, dificultad,
+                         indicaciones, imagen, tipo_imagen)
+                    OUTPUT INSERTED.id_ejercicio
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    Integer.class,
+                    name,
+                    new SqlParameterValue(Types.VARCHAR, description),
+                    group,
+                    request.dificultad(),
+                    new SqlParameterValue(Types.VARCHAR, instructions),
+                    new SqlParameterValue(Types.VARBINARY, image),
+                    new SqlParameterValue(Types.VARCHAR, imageType));
+            if (id == null) {
+                throw new IllegalStateException("SQL Server no devolvió el identificador del ejercicio.");
+            }
+            return new ExerciseSummary(
+                    id, name, description, group, request.dificultad(), instructions, image != null);
+        } catch (DuplicateKeyException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un ejercicio con ese nombre.",
+                    exception);
+        }
+    }
+
+    public ExerciseImage findExerciseImage(int id) {
+        List<ExerciseImage> rows = jdbcTemplate.query("""
+                SELECT imagen, tipo_imagen
+                FROM dbo.Ejercicio
+                WHERE id_ejercicio = ? AND estado = 1 AND imagen IS NOT NULL
+                """,
+                (rs, rowNum) -> new ExerciseImage(rs.getBytes("imagen"), rs.getString("tipo_imagen")),
+                id);
+        if (rows.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El ejercicio no tiene imagen.");
+        }
+        return rows.get(0);
     }
 
     public List<RoutineSummary> findAll() {
@@ -258,6 +340,9 @@ public class RoutineQueryService {
 
     private static String nullableDescription(String description) {
         return description == null || description.isBlank() ? null : description.trim();
+    }
+
+    public record ExerciseImage(byte[] data, String type) {
     }
 
     private record RoutineRow(

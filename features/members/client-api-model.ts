@@ -21,6 +21,7 @@ export type ApiClient = {
   nombreRutina: string | null;
   idEntrenador: number | null;
   nombreEntrenador: string | null;
+  tieneFoto?: boolean;
 };
 
 export type ApiPlan = {
@@ -69,7 +70,8 @@ function isApiClient(value: unknown): value is ApiClient {
     (client.idRutina === null || Number.isInteger(client.idRutina)) &&
     isOptionalString(client.nombreRutina) &&
     (client.idEntrenador === null || Number.isInteger(client.idEntrenador)) &&
-    isOptionalString(client.nombreEntrenador)
+    isOptionalString(client.nombreEntrenador) &&
+    (client.tieneFoto === undefined || typeof client.tieneFoto === "boolean")
   );
 }
 

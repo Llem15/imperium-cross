@@ -49,7 +49,7 @@ GRANT SELECT, INSERT, UPDATE ON OBJECT::dbo.Producto TO [ic_app];
 GRANT SELECT, INSERT, UPDATE ON OBJECT::dbo.Inventario TO [ic_app];
 GRANT SELECT, INSERT, UPDATE, DELETE ON OBJECT::dbo.Rutina TO [ic_app];
 GRANT SELECT, INSERT, UPDATE, DELETE ON OBJECT::dbo.DetalleRutina TO [ic_app];
-GRANT SELECT ON OBJECT::dbo.Ejercicio TO [ic_app];
+GRANT SELECT, INSERT ON OBJECT::dbo.Ejercicio TO [ic_app];
 GRANT SELECT, INSERT, UPDATE ON OBJECT::dbo.AsignacionRutina TO [ic_app];
 GO
 ```

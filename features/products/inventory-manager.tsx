@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchField, StatusBadge } from "@/components/dashboard/dashboard-ui";
 import {
@@ -11,6 +12,7 @@ import {
   RowAction,
 } from "@/components/dashboard/management-ui";
 import type { FormValues } from "@/components/dashboard/management-ui";
+import { PhotoPicker } from "@/components/dashboard/photo-picker";
 import { money } from "@/mocks/internal-data";
 import { parseApiProducts } from "./product-api-model";
 import type { ApiProduct } from "./product-api-model";
@@ -39,6 +41,8 @@ export function InventoryManager() {
   const [editing, setEditing] = useState<ApiProduct | "new" | null>(null);
   const [viewing, setViewing] = useState<ApiProduct | null>(null);
   const [deactivating, setDeactivating] = useState<ApiProduct | null>(null);
+  const [photo, setPhoto] = useState("");
+  const [photoChanged, setPhotoChanged] = useState(false);
 
   const loadProducts = useCallback(async (signal?: AbortSignal) => {
     const response = await fetch(`${apiBaseUrl}/api/productos`, {
@@ -118,6 +122,7 @@ export function InventoryManager() {
           stock,
           stockMinimo: minimum,
           activo: values.active === "true",
+          imagen: photoChanged ? photo : undefined,
         }),
       },
     );
@@ -168,7 +173,7 @@ export function InventoryManager() {
     <>
       <ManagementPanel
         title="Productos"
-        subtitle="Catálogo e inventario guardados en SQL Server"
+        subtitle="Catálogo e inventario"
         actions={
           <>
             <SearchField value={query} onChange={setQuery} label="Buscar producto" />
@@ -176,6 +181,8 @@ export function InventoryManager() {
               small
               onClick={() => {
                 setSuccess("");
+                setPhoto("");
+                setPhotoChanged(false);
                 setEditing("new");
               }}
             >
@@ -270,6 +277,12 @@ export function InventoryManager() {
                       label={`Editar ${row.nombreProducto}`}
                       onClick={() => {
                         setSuccess("");
+                        setPhoto(
+                          row.tieneImagen
+                            ? `${apiBaseUrl}/api/productos/${row.idProducto}/imagen`
+                            : "",
+                        );
+                        setPhotoChanged(false);
                         setEditing(row);
                       }}
                     />
@@ -290,6 +303,19 @@ export function InventoryManager() {
       {editing && (
         <RecordForm
           title={editing === "new" ? "Agregar producto" : "Editar producto"}
+          header={
+            <PhotoPicker
+              shape="rounded"
+              value={photo}
+              onChange={(value) => {
+                setPhoto(value);
+                setPhotoChanged(true);
+              }}
+            />
+          }
+          compact
+          hideCancel
+          submitLabel={editing === "new" ? "Agregar" : "Guardar"}
           fields={[
             { name: "name", label: "Producto (máximo 40 caracteres)", wide: true, maxLength: 40 },
             { name: "price", label: "Precio (S/)", type: "number", min: 0 },
@@ -339,6 +365,22 @@ export function InventoryManager() {
       )}
       {viewing && (
         <Details title={viewing.nombreProducto} onClose={() => setViewing(null)}>
+          <div className="relative mx-auto mb-5 aspect-[147/128] w-full max-w-50 overflow-hidden rounded-lg bg-dashboard-canvas">
+            {viewing.tieneImagen ? (
+              <Image
+                src={`${apiBaseUrl}/api/productos/${viewing.idProducto}/imagen`}
+                alt=""
+                fill
+                unoptimized
+                sizes="200px"
+                className="object-contain"
+              />
+            ) : (
+              <span className="absolute inset-0 grid place-items-center text-sm text-muted">
+                Sin imagen
+              </span>
+            )}
+          </div>
           <p className="text-xl font-bold">{money(Math.round(viewing.precio * 100))}</p>
           <p className="mt-4 text-sm">Categoría: {viewing.categoria ?? "—"}</p>
           <p className="mt-2 text-sm">Stock: {viewing.stock}</p>
@@ -346,9 +388,6 @@ export function InventoryManager() {
           {viewing.descripcionProducto && (
             <p className="mt-4 text-sm">{viewing.descripcionProducto}</p>
           )}
-          <p className="mt-4 text-caption text-muted">
-            El esquema SQL actual no almacena imágenes para productos.
-          </p>
         </Details>
       )}
       {deactivating && (
