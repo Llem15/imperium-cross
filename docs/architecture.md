@@ -1,8 +1,8 @@
 # Arquitectura inicial
 
-Imperium Cross es una aplicación para un único gimnasio. Se desarrolla como una sola aplicación con Next.js App Router y funcionalidades organizadas por dominio cuando existe código que lo justifique. La etapa actual es exclusivamente frontend, con datos de demostración y sin persistencia.
+Imperium Cross es un sistema para un único gimnasio. El frontend usa Next.js App Router; el backend separado usa Java, Spring Boot y Gradle para exponer una API que consulta SQL Server. La integración está en curso: los listados de clientes de administración y recepción leen la API; el resto del prototipo continúa usando datos de demostración y no tiene persistencia.
 
-El [frontend interno](dashboard-foundation.md) organiza rutas mediante grupos de acceso y paneles, componentes compartidos en `components/`, funcionalidades en `features/` y fixtures tipados en `mocks/`. Un contexto React conserva las modificaciones del escenario en memoria durante la navegación. Las rutas de los cuatro perfiles están abiertas: el login con cuentas solo organiza el recorrido de demostración.
+El [frontend interno](dashboard-foundation.md) organiza rutas mediante grupos de acceso y paneles, componentes compartidos en `components/`, funcionalidades en `features/` y fixtures tipados en `mocks/`. Un contexto React conserva las modificaciones locales del escenario durante la navegación. El backend está en `backend/`; las pantallas de clientes consultan y permiten crear, editar y desactivar registros mediante las tablas existentes, sin cambiar el esquema. Otras funciones aún usan datos locales. Las rutas de los cuatro perfiles siguen abiertas: el login con cuentas solo organiza el recorrido de demostración.
 
 ## Responsabilidades y organización
 

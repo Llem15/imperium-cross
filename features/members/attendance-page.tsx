@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SearchField, StatusBadge } from "@/components/dashboard/dashboard-ui";
 import {
   Button,
@@ -9,32 +9,162 @@ import {
   ManagementPanel,
   Notice,
 } from "@/components/dashboard/management-ui";
-import { useDemoData } from "@/features/demo/demo-provider";
-import { demoDate, fullName, matchesMember } from "@/mocks/dashboard";
-import { membershipStatus, newDemoId } from "@/mocks/internal-data";
+import { getApiMembershipStatus, parseApiClients } from "./client-api-model";
+import type { ApiClient } from "./client-api-model";
+import { parseApiAttendance, parseApiAttendances } from "./attendance-api-model";
+import type { ApiAttendance } from "./attendance-api-model";
+
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(
+  /\/+$/,
+  "",
+);
+
+function localDateValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function fullName(client: ApiClient) {
+  return `${client.nombres} ${client.apellidos}`;
+}
+
+function responseMessage(payload: unknown, fallback: string) {
+  if (typeof payload === "object" && payload !== null) {
+    const body = payload as Record<string, unknown>;
+    if (typeof body.detail === "string") return body.detail;
+    if (typeof body.message === "string") return body.message;
+  }
+  return fallback;
+}
 
 export function AttendancePage() {
-  const { data, setData } = useDemoData();
-  const [date, setDate] = useState(demoDate);
+  const [today, setToday] = useState("");
+  const [date, setDate] = useState("");
+  const [clients, setClients] = useState<ApiClient[]>([]);
+  const [attendance, setAttendance] = useState<ApiAttendance[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [memberId, setMemberId] = useState("");
   const [notice, setNotice] = useState("");
-  const member = data.members.find((item) => item.id === memberId);
-  const results = data.members.filter(
-    (item) =>
-      matchesMember(item, query) ||
-      item.dni.includes(query.trim()) ||
-      item.attendanceCode === query.trim(),
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function initializeDate() {
+      await Promise.resolve();
+      if (controller.signal.aborted) return;
+      const currentDate = localDateValue();
+      setToday(currentDate);
+      setDate(currentDate);
+    }
+    void initializeDate();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!date) return;
+    const controller = new AbortController();
+    async function loadData() {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const [clientResponse, attendanceResponse] = await Promise.all([
+          fetch(`${apiBaseUrl}/api/clientes`, {
+            signal: controller.signal,
+            headers: { Accept: "application/json" },
+          }),
+          fetch(`${apiBaseUrl}/api/asistencias?fecha=${encodeURIComponent(date)}`, {
+            signal: controller.signal,
+            headers: { Accept: "application/json" },
+          }),
+        ]);
+        if (!clientResponse.ok) {
+          throw new Error(`No se pudieron cargar los clientes (HTTP ${clientResponse.status}).`);
+        }
+        if (!attendanceResponse.ok) {
+          throw new Error(
+            `No se pudieron cargar las asistencias (HTTP ${attendanceResponse.status}).`,
+          );
+        }
+        const [clientPayload, attendancePayload] = await Promise.all([
+          clientResponse.json(),
+          attendanceResponse.json(),
+        ]);
+        setClients(parseApiClients(clientPayload));
+        setAttendance(parseApiAttendances(attendancePayload));
+      } catch (cause) {
+        if (controller.signal.aborted) return;
+        setLoadError(cause instanceof Error ? cause.message : "No se pudieron cargar los datos.");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+    void loadData();
+    return () => controller.abort();
+  }, [date, reload]);
+
+  const selectedClient = clients.find((client) => String(client.idCliente) === memberId);
+  const todayAttendances = useMemo(
+    () => new Set(attendance.map((entry) => entry.idCliente)),
+    [attendance],
   );
-  const duplicate = data.attendance.some(
-    (entry) => entry.memberId === memberId && entry.date === demoDate,
-  );
+  const matchingClients = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+    if (!normalizedQuery) return clients;
+    return clients.filter((client) =>
+      `${client.nombres} ${client.apellidos} ${client.dni}`
+        .toLocaleLowerCase()
+        .includes(normalizedQuery),
+    );
+  }, [clients, query]);
+  const duplicate = selectedClient ? todayAttendances.has(selectedClient.idCliente) : false;
+  const membership = selectedClient ? getApiMembershipStatus(selectedClient, today) : null;
+  const canRegister =
+    Boolean(selectedClient) &&
+    date === today &&
+    membership?.status === "active" &&
+    !duplicate &&
+    !submitting;
+
+  async function registerAttendance() {
+    if (!selectedClient || !canRegister) return;
+    setSubmitting(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/asistencias`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ idCliente: selectedClient.idCliente }),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(
+          responseMessage(payload, `No se pudo registrar la asistencia (HTTP ${response.status}).`),
+        );
+      }
+      const savedAttendance = parseApiAttendance(await response.json());
+      setAttendance((current) => [savedAttendance, ...current]);
+      setNotice(`Asistencia registrada para ${fullName(selectedClient)}.`);
+      setOpen(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudo registrar la asistencia.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <>
       <ManagementPanel
         title="Asistencia"
-        subtitle="Registro de ingreso al gimnasio"
+        subtitle="Registro de ingresos validado con membresías activas en SQL Server"
         actions={
           <>
             <label className="text-sm">
@@ -52,6 +182,7 @@ export function AttendancePage() {
                 setOpen(true);
                 setQuery("");
                 setMemberId("");
+                setError("");
               }}
             >
               + Marcar asistencia
@@ -60,121 +191,106 @@ export function AttendancePage() {
         }
       >
         {notice && <Notice>{notice}</Notice>}
-        <DataTable
-          rows={data.attendance.filter((entry) => !date || entry.date === date)}
-          caption="Registro de asistencias"
-          columns={[
-            {
-              label: "Nombre",
-              render: (row) =>
-                data.members.find((item) => item.id === row.memberId)?.firstName ?? "—",
-            },
-            {
-              label: "Apellidos",
-              render: (row) =>
-                data.members.find((item) => item.id === row.memberId)?.lastName ?? "—",
-            },
-            {
-              label: "Membresía",
-              render: (row) =>
-                data.plans.find(
-                  (plan) =>
-                    plan.id === data.members.find((item) => item.id === row.memberId)?.planId,
-                )?.name ?? "—",
-            },
-            { label: "Fecha", render: (row) => row.date },
-            { label: "Hora", render: (row) => row.time },
-            {
-              label: "Estado",
-              render: () => <StatusBadge status="active" label="Ingreso registrado" />,
-            },
-          ]}
-        />
+        {loadError && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <p role="alert" className="text-sm text-red-700">
+              {loadError}
+            </p>
+            <Button small onClick={() => setReload((value) => value + 1)}>
+              Reintentar
+            </Button>
+          </div>
+        )}
+        {loading ? (
+          <p role="status" className="py-8 text-center text-sm text-muted">
+            Cargando asistencias...
+          </p>
+        ) : !loadError ? (
+          <DataTable
+            rows={attendance.map((entry) => ({ ...entry, id: String(entry.idAsistencia) }))}
+            caption="Registro de asistencias"
+            columns={[
+              { label: "Nombre", render: (row) => row.nombres },
+              { label: "Apellidos", render: (row) => row.apellidos },
+              { label: "Membresía", render: (row) => row.nombrePlan ?? "—" },
+              { label: "Fecha", render: (row) => row.fechaHora.slice(0, 10) },
+              { label: "Hora", render: (row) => row.fechaHora.slice(11, 16) },
+              {
+                label: "Estado",
+                render: () => <StatusBadge status="active" label="Ingreso registrado" />,
+              },
+            ]}
+          />
+        ) : null}
       </ManagementPanel>
       {open && (
         <Details title="Marcar asistencia" onClose={() => setOpen(false)}>
-          <p className="mb-5 text-sm text-line">
-            Registro de ingreso al gimnasio · fecha: {demoDate}
-          </p>
+          <p className="mb-5 text-sm text-line">Registro de ingreso · fecha de hoy: {today}</p>
           <SearchField
             value={query}
             onChange={(value) => {
               setQuery(value);
               setMemberId("");
+              setError("");
             }}
-            label="Buscar por nombre, DNI o código"
+            label="Buscar por nombre o DNI"
           />
-          {!member && (
+          {!selectedClient && (
             <ul className="mt-4 max-h-44 overflow-auto">
-              {results.map((item) => (
-                <li key={item.id}>
+              {matchingClients.map((client) => (
+                <li key={client.idCliente}>
                   <button
                     type="button"
-                    onClick={() => setMemberId(item.id)}
+                    onClick={() => setMemberId(String(client.idCliente))}
                     className="w-full cursor-pointer border-b border-dashboard-line p-3 text-left text-sm hover:bg-brand-surface"
                   >
-                    {fullName(item)} · {item.dni}
+                    {fullName(client)} · {client.dni}
                   </button>
                 </li>
               ))}
             </ul>
           )}
-          {results.length === 0 && (
+          {matchingClients.length === 0 && (
             <p role="status" className="my-5 text-sm">
               No se encontraron clientes.
             </p>
           )}
-          {member && (
+          {selectedClient && membership && (
             <>
               <div className="my-5 space-y-3 rounded-media bg-dashboard-canvas p-4 text-sm">
                 <h3 className="font-bold">Información del socio</h3>
-                <p>Cliente: {fullName(member)}</p>
-                <p>DNI: {member.dni}</p>
+                <p>Cliente: {fullName(selectedClient)}</p>
+                <p>DNI: {selectedClient.dni}</p>
                 <p>
-                  Estado: <StatusBadge status={membershipStatus(member)} />
+                  Estado: <StatusBadge status={membership.status} label={membership.label} />
                 </p>
-                <p>Plan: {data.plans.find((plan) => plan.id === member.planId)?.name}</p>
-                <p>Vencimiento: {member.expiresOn}</p>
+                <p>Plan: {selectedClient.nombrePlan ?? "—"}</p>
+                <p>Vencimiento: {selectedClient.fechaFinMembresia ?? "—"}</p>
               </div>
               <Notice>
-                {duplicate
-                  ? "Este socio ya tiene un ingreso registrado para esta fecha."
-                  : membershipStatus(member) === "active"
-                    ? "Membresía vigente. Puede continuar con el registro de ingreso."
-                    : membershipStatus(member) === "pending"
-                      ? "Pago pendiente. La asistencia no puede confirmarse."
-                      : "Membresía vencida. Renueva la membresía antes de registrar el ingreso."}
+                {date !== today
+                  ? "Solo se pueden registrar ingresos para la fecha actual."
+                  : duplicate
+                    ? "Este socio ya tiene un ingreso registrado para hoy."
+                    : membership.status === "active"
+                      ? "Membresía vigente. Puede continuar con el registro de ingreso."
+                      : membership.status === "pending"
+                        ? "La membresía no está activa o el pago está pendiente."
+                        : "Membresía vencida. Renueva la membresía antes de registrar el ingreso."}
               </Notice>
             </>
           )}
+          {error && (
+            <p role="alert" className="mt-4 text-sm text-red-700">
+              {error}
+            </p>
+          )}
           <Button
             className="mt-5 w-full"
-            disabled={!member || membershipStatus(member) !== "active" || duplicate}
-            onClick={() => {
-              if (!member) return;
-              const now = new Date();
-              setData((current) => ({
-                ...current,
-                attendance: [
-                  ...current.attendance,
-                  {
-                    id: newDemoId("attendance"),
-                    memberId: member.id,
-                    date: demoDate,
-                    time: now.toLocaleTimeString("es-PE", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    }),
-                  },
-                ],
-              }));
-              setDate(demoDate);
-              setOpen(false);
-              setNotice(`Asistencia registrada para ${fullName(member)}.`);
-            }}
+            disabled={!canRegister}
+            onClick={() => void registerAttendance()}
           >
-            Confirmar asistencia
+            {submitting ? "Registrando..." : "Confirmar asistencia"}
           </Button>
         </Details>
       )}

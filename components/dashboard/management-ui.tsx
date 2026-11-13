@@ -230,13 +230,15 @@ export type FormValues = Record<string, string>;
 export type FormField = {
   name: string;
   label: string;
-  type?: "text" | "email" | "number" | "date" | "select" | "textarea" | "image";
+  type?: "text" | "email" | "password" | "number" | "date" | "select" | "textarea" | "image";
   options?: readonly { value: string; label: string }[];
   required?: boolean;
   wide?: boolean;
   min?: number;
   maxLength?: number;
+  minLength?: number;
   pattern?: string;
+  autoComplete?: string;
 };
 
 export function RecordForm({
@@ -248,21 +250,25 @@ export function RecordForm({
   onSubmit,
   submitLabel = "Guardar",
   extra,
+  wide = false,
 }: {
   title: string;
   subtitle?: string;
   fields: readonly FormField[];
   initialValues: FormValues;
   onClose: () => void;
-  onSubmit: (values: FormValues) => string | void;
+  onSubmit: (values: FormValues) => string | void | Promise<string | void>;
   submitLabel?: string;
   extra?: ReactNode;
+  wide?: boolean;
 }) {
   const id = useId();
   const [values, setValues] = useState(initialValues);
   const [error, setError] = useState("");
-  function submit(event: FormEvent<HTMLFormElement>) {
+  const [submitting, setSubmitting] = useState(false);
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting) return;
     const cleaned = Object.fromEntries(
       Object.entries(values).map(([key, value]) => [key, value.trim()]),
     );
@@ -270,8 +276,15 @@ export function RecordForm({
       setError("Completa los campos obligatorios sin dejar solo espacios.");
       return;
     }
-    const result = onSubmit(cleaned);
-    if (result) setError(result);
+    setSubmitting(true);
+    try {
+      const result = await onSubmit(cleaned);
+      if (result) setError(result);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudo guardar el registro.");
+    } finally {
+      setSubmitting(false);
+    }
   }
   const control =
     "mt-2 min-h-10 w-full min-w-0 rounded-control border border-muted bg-white px-3 py-2.5 text-sm focus:outline-2 focus:outline-brand-start";
@@ -280,8 +293,9 @@ export function RecordForm({
       open
       onClose={onClose}
       labelledBy={`${id}-title`}
-      narrow
-      className="px-11.5 py-10 max-sm:px-6"
+      narrow={!wide}
+      wide={wide}
+      className={wide ? "px-8 py-7 max-sm:px-5 max-sm:py-6" : "px-11.5 py-10 max-sm:px-6"}
     >
       <h2
         id={`${id}-title`}
@@ -374,9 +388,11 @@ export function RecordForm({
                     {...common}
                     type={field.type ?? "text"}
                     min={field.min}
+                    minLength={field.minLength}
                     step={field.type === "number" ? "any" : undefined}
                     maxLength={field.maxLength}
                     pattern={field.pattern}
+                    autoComplete={field.autoComplete}
                   />
                 )}
               </label>
@@ -390,11 +406,11 @@ export function RecordForm({
           </p>
         )}
         <div className="mt-7 flex gap-3">
-          <Button variant="outline" onClick={onClose} className="flex-1">
+          <Button variant="outline" onClick={onClose} disabled={submitting} className="flex-1">
             Cancelar
           </Button>
-          <Button type="submit" className="flex-1">
-            {submitLabel}
+          <Button type="submit" disabled={submitting} className="flex-1">
+            {submitting ? "Guardando…" : submitLabel}
           </Button>
         </div>
       </form>

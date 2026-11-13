@@ -50,6 +50,10 @@ Después de una compilación correcta, iniciar el servidor de producción:
 npm.cmd run start
 ```
 
+## Backend
+
+El backend Java/Spring Boot está en [`backend/`](backend/README.md). Es un servicio separado del frontend y usa SQL Server. La consulta de clientes para administración y recepción ya consume la API; las demás funciones todavía usan datos de demostración.
+
 ## Diseño oficial
 
 El diseño es [Imperium Cross en Figma](https://www.figma.com/design/5EPZT22l83oUzSrBw33zgt/Imperium-Cross?node-id=1-5). Consultar el diseño correspondiente antes de implementar cada pantalla.
