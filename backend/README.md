@@ -22,6 +22,32 @@ $env:APP_CORS_ALLOWED_ORIGINS = "http://localhost:3000"
 
 La URL de ejemplo presupone SQL Server escuchando en el puerto TCP 1433. Ajusta host, puerto, instancia y autenticación a la instalación local. `trustServerCertificate=true` es solo para desarrollo local; en producción configura TLS con un certificado de confianza. Usa un login dedicado de SQL Server con permisos mínimos, no `sa`.
 
+## Protección de endpoints
+
+La API usa Spring Security con autenticación HTTP Basic: cada solicitud protegida debe incluir una cuenta activa de `dbo.Usuario`, usando su correo y contraseña. El backend obtiene el rol desde `dbo.Rol`; no se añade un endpoint de inicio de sesión ni se crea una sesión web. Usa esta configuración solo sobre `localhost` o detrás de HTTPS; HTTP Basic envía las credenciales en cada solicitud.
+
+Los usuarios semilla existentes pueden tener la contraseña guardada en texto plano, mientras que las cuentas nuevas usan BCrypt. Para permitir la transición, la primera autenticación correcta de una contraseña antigua actualiza `dbo.Usuario.contrasena` a un hash BCrypt. **Este es el único cambio de datos que hace la seguridad**: actualiza una fila existente al iniciar sesión, no crea tablas ni columnas y no requiere ejecutar scripts SQL. Anota este comportamiento al probarlo con la base compartida. No se registran contraseñas en logs.
+
+`GET /actuator/health` es público y solo devuelve el estado. Los demás endpoints no declarados se deniegan.
+
+| Operación | Roles permitidos |
+| --- | --- |
+| Consultar ejercicios, planes y productos | Administrador, Recepción, Entrenador y Cliente |
+| Consultar, crear o editar clientes | Administrador y Recepción |
+| Desactivar clientes | Administrador |
+| Consultar y gestionar matrículas, pagos y asistencia | Administrador y Recepción |
+| Crear, editar o desactivar planes y productos | Administrador |
+| Consultar rutinas y ejercicios | Administrador y Entrenador |
+| Crear rutinas | Administrador y Entrenador |
+| Editar o desactivar rutinas | Administrador; Entrenador solo si la rutina no está asignada a clientes de otros entrenadores |
+| Gestionar horarios y reservas | Administrador |
+
+La respuesta para una solicitud sin credenciales válidas es `401`; si la cuenta está autenticada pero su rol no tiene permiso, es `403`. El entrenador solo recibe nombres de clientes asignados a él en `GET /api/rutinas`. Las reservas siguen limitadas a Administración porque sus operaciones aceptan IDs de membresía/reserva sin comprobar propiedad de socio; no se deben habilitar para Cliente hasta implementar esa comprobación.
+
+La interfaz Next.js todavía usa un login de demostración y no envía credenciales HTTP Basic. Por eso, las pantallas conectadas a la API recibirán `401` hasta que se integre una autenticación real en el frontend. Para comprobar esta fase, usa un cliente API como Postman: selecciona **Basic Auth**, introduce el correo y la contraseña de una cuenta de la base, y prueba los roles permitidos y denegados. La configuración no modifica el esquema SQL.
+
+`src/main/resources/application.properties` limita el servidor a `127.0.0.1` por defecto. `SERVER_ADDRESS` permite cambiarlo explícitamente; no expongas la API en una red ni en producción sin TLS.
+
 Para permitir el CRUD de clientes y registrar/confirmar pagos, el usuario SQL de la aplicación necesita lectura de roles/clientes/membresías/planes/pagos y escritura en `Usuario`, `Cliente`, `Membresia` y `Pago`:
 
 ```sql
@@ -109,3 +135,12 @@ La carpeta `INTEGRADORII-BD` contiene el DDL; `01_CrearBd.sql` crea la base `Imp
 El catálogo oficial usa Plan Básico (S/ 39.99), Plan Premium (S/ 69.99) y Plan Pro (S/ 99.99), todos por 30 días. El paso `04_datosMembresiasPagos.sql` de la carpeta de scripts SQL mantiene ese catálogo para instalaciones de demostración nuevas.
 
 La autenticación y autorización aún no están implementadas. No expongas la API a usuarios reales hasta añadirlas y validar permisos en el servidor.
+
+-------implementaciones nuevas--------
+
+- Se añadió Spring Security con autenticación HTTP Basic sin estado. Las rutas de API requieren credenciales y permisos según el rol; las solicitudes a rutas no reconocidas se deniegan. El endpoint de salud queda público.
+- Los usuarios y roles se validan contra las tablas existentes de la base de datos. Se admiten contraseñas BCrypt y se convierten a BCrypt al iniciar sesión las cuentas semilla que aún tengan contraseña en texto plano. Esta conversión actualiza el registro del usuario; no crea ni modifica tablas.
+- Se aplicaron restricciones por rol a las operaciones de usuarios, clientes, membresías, pagos, asistencia, productos, rutinas y horarios. El entrenador solo consulta clientes asignados a él y no puede modificar rutinas asignadas a clientes de otros entrenadores.
+- Se configuró CORS para la API y el servidor escucha en `127.0.0.1` por defecto, configurable mediante `SERVER_ADDRESS`. El frontend aún no envía HTTP Basic; la integración y las pruebas con la base de datos real quedan pendientes.
+
+Esta sección resume la implementación vigente. Algunas notas anteriores de este README que dicen que la autenticación no está implementada corresponden al estado previo y se conservaron sin cambios.

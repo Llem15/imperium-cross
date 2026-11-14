@@ -47,7 +47,7 @@ public class RoutineQueryService {
                         rs.getString("dificultad")));
     }
 
-    public List<RoutineSummary> findAll() {
+    public List<RoutineSummary> findAll(Integer trainerUserId) {
         List<RoutineRow> routines = jdbcTemplate.query("""
                 SELECT id_rutina, nombre_rutina, nivel, objetivo, descripcion_rutina,
                        fecha_creacion, estado
@@ -82,17 +82,27 @@ public class RoutineQueryService {
                                 nullableInt(rs, "tiempo"),
                                 rs.getInt("descanso"))));
 
-        List<RoutineClientRow> clients = jdbcTemplate.query("""
+        String clientSql = """
+                SELECT ar.id_rutina, CONCAT(u.nombres, ' ', u.apellidos) AS nombre_cliente
+                FROM dbo.AsignacionRutina ar
+                INNER JOIN dbo.Cliente c ON c.id_cliente = ar.id_cliente
+                INNER JOIN dbo.Usuario u ON u.id_usuario = c.id_usuario
+                WHERE ar.estado = 1 AND ar.id_entrenador = ?
+                ORDER BY ar.id_rutina, u.apellidos, u.nombres
+                """;
+        String allClientSql = """
                 SELECT ar.id_rutina, CONCAT(u.nombres, ' ', u.apellidos) AS nombre_cliente
                 FROM dbo.AsignacionRutina ar
                 INNER JOIN dbo.Cliente c ON c.id_cliente = ar.id_cliente
                 INNER JOIN dbo.Usuario u ON u.id_usuario = c.id_usuario
                 WHERE ar.estado = 1
                 ORDER BY ar.id_rutina, u.apellidos, u.nombres
-                """,
-                (rs, rowNum) -> new RoutineClientRow(
-                        rs.getInt("id_rutina"),
-                        rs.getString("nombre_cliente")));
+                """;
+        var clientMapper = (org.springframework.jdbc.core.RowMapper<RoutineClientRow>) (rs, rowNum) ->
+                new RoutineClientRow(rs.getInt("id_rutina"), rs.getString("nombre_cliente"));
+        List<RoutineClientRow> clients = trainerUserId == null
+                ? jdbcTemplate.query(allClientSql, clientMapper)
+                : jdbcTemplate.query(clientSql, clientMapper, trainerUserId);
 
         Map<Integer, List<RoutineExerciseSummary>> exercisesByRoutine = new HashMap<>();
         exercises.forEach(row -> exercisesByRoutine
@@ -145,7 +155,8 @@ public class RoutineQueryService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void update(int routineId, RoutineRequest request) {
+    public void update(int routineId, RoutineRequest request, Integer trainerUserId) {
+        assertTrainerOwnsAssignments(routineId, trainerUserId);
         List<String> currentObjectives = jdbcTemplate.query("""
                 SELECT objetivo
                 FROM dbo.Rutina WITH (UPDLOCK, HOLDLOCK)
@@ -195,7 +206,8 @@ public class RoutineQueryService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void deactivate(int routineId) {
+    public void deactivate(int routineId, Integer trainerUserId) {
+        assertTrainerOwnsAssignments(routineId, trainerUserId);
         List<String> objectives = jdbcTemplate.query("""
                 SELECT objetivo
                 FROM dbo.Rutina WITH (UPDLOCK, HOLDLOCK)
@@ -243,6 +255,25 @@ public class RoutineQueryService {
                     nullableSmallInt(exercise.tiempo()),
                     exercise.descanso(),
                     index + 1);
+        }
+    }
+
+    private void assertTrainerOwnsAssignments(int routineId, Integer trainerUserId) {
+        if (trainerUserId == null) return;
+        Integer assignmentsOwnedByOthers = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM dbo.AsignacionRutina
+                WHERE id_rutina = ?
+                  AND estado = 1
+                  AND (id_entrenador IS NULL OR id_entrenador <> ?)
+                """,
+                Integer.class,
+                routineId,
+                trainerUserId);
+        if (assignmentsOwnedByOthers != null && assignmentsOwnedByOthers > 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No puedes modificar una rutina asignada a clientes de otro entrenador.");
         }
     }
 
