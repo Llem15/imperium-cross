@@ -73,6 +73,7 @@ public class SecurityConfiguration {
                         .hasRole("ADMIN")
                         .requestMatchers("/api/reservas", "/api/reservas/**")
                         .hasRole("ADMIN")
+                        .requestMatchers("/api/nutricion/**").hasRole("MEMBER")
                         .anyRequest().denyAll())
                 .httpBasic(basic -> basic.realmName("Imperium Cross API"));
 
