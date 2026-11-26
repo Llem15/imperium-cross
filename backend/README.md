@@ -30,17 +30,18 @@ Los usuarios semilla existentes pueden tener la contraseña guardada en texto pl
 
 `GET /actuator/health` es público y solo devuelve el estado. Los demás endpoints no declarados se deniegan.
 
-| Operación | Roles permitidos |
-| --- | --- |
-| Consultar ejercicios, planes y productos | Administrador, Recepción, Entrenador y Cliente |
-| Consultar, crear o editar clientes | Administrador y Recepción |
-| Desactivar clientes | Administrador |
-| Consultar y gestionar matrículas, pagos y asistencia | Administrador y Recepción |
-| Crear, editar o desactivar planes y productos | Administrador |
-| Consultar rutinas y ejercicios | Administrador y Entrenador |
-| Crear rutinas | Administrador y Entrenador |
-| Editar o desactivar rutinas | Administrador; Entrenador solo si la rutina no está asignada a clientes de otros entrenadores |
-| Gestionar horarios y reservas | Administrador |
+| Operación                                            | Roles permitidos                                                                              |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Consultar ejercicios, planes y productos             | Administrador, Recepción, Entrenador y Cliente                                                |
+| Consultar, crear o editar clientes                   | Administrador y Recepción                                                                     |
+| Desactivar clientes                                  | Administrador                                                                                 |
+| Consultar y gestionar matrículas, pagos y asistencia | Administrador y Recepción                                                                     |
+| Crear, editar o desactivar planes y productos        | Administrador                                                                                 |
+| Consultar rutinas y ejercicios                       | Administrador y Entrenador                                                                    |
+| Crear rutinas                                        | Administrador y Entrenador                                                                    |
+| Editar o desactivar rutinas                          | Administrador; Entrenador solo si la rutina no está asignada a clientes de otros entrenadores |
+| Gestionar horarios y reservas                        | Administrador                                                                                 |
+| Sección nutricional (`/api/nutricion/**`)            | Cliente                                                                                       |
 
 La respuesta para una solicitud sin credenciales válidas es `401`; si la cuenta está autenticada pero su rol no tiene permiso, es `403`. El entrenador solo recibe nombres de clientes asignados a él en `GET /api/rutinas`. Las reservas siguen limitadas a Administración porque sus operaciones aceptan IDs de membresía/reserva sin comprobar propiedad de socio; no se deben habilitar para Cliente hasta implementar esa comprobación.
 
@@ -129,6 +130,71 @@ El frontend consume estos endpoints en clientes de administración/recepción y 
 Los endpoints operan sobre las tablas existentes `Rol`, `Usuario`, `Cliente`, `Membresia`, `PlanMembresia`, `Pago`, `Asistencia`, `Producto`, `Inventario`, `Rutina`, `DetalleRutina`, `Ejercicio` y `AsignacionRutina`, más las columnas y tablas añadidas por los scripts 10, 11 y 12. Antes de dar acceso a clientes reales, implementar flujo de invitación/recuperación y autenticación compatible con BCrypt: los usuarios semilla actuales contienen contraseñas de demostración en texto plano, mientras los nuevos se guardan con hash.
 
 La carpeta `INTEGRADORII-BD` contiene el DDL; `01_CrearBd.sql` crea la base `Imperiumcross-bd`. La configuración de ejemplo apunta a esa base. Verifica que la base esté creada y que el usuario de aplicación tenga permisos de lectura antes de iniciar la API.
+
+## Sección nutricional
+
+Solo rol Cliente. El cliente se toma del usuario autenticado; un registro de otro socio responde `404`.
+
+| Método y ruta                                            | Respuesta                                         |
+| -------------------------------------------------------- | ------------------------------------------------- |
+| `GET /api/nutricion/metas`                               | Metas diarias                                     |
+| `GET /api/nutricion/comidas?fecha=AAAA-MM-DD`            | Comidas guardadas; `fecha` opcional, hora de Perú |
+| `POST /api/nutricion/analisis` (multipart, campo `foto`) | Análisis `Pendiente`                              |
+| `POST /api/nutricion/analisis/{id}/guardar`              | Comida guardada                                   |
+| `DELETE /api/nutricion/comidas/{id}`                     | `204`, borrado lógico                             |
+| `GET /api/nutricion/comidas/{id}/imagen`                 | Foto (JPEG de 1280 px, sin EXIF)                  |
+
+| Código | Caso                                                                |
+| ------ | ------------------------------------------------------------------- |
+| `400`  | Foto vacía, de más de 5 MB o no JPEG/PNG/WebP; id o fecha inválidos |
+| `403`  | Rol distinto de Cliente o cliente inactivo                          |
+| `404`  | Registro inexistente o de otro socio                                |
+| `422`  | La foto no es comida                                                |
+| `503`  | IA no disponible: límite superado, error o respuesta inválida       |
+
+- Tablas: `docs/nutricion-bd-propuesta.sql` (propuesta; revisar y ejecutar en SSMS).
+- Los análisis `Pendiente` de más de 24 h se borran al analizar otra foto.
+- En el plan gratuito de Gemini, Google puede usar las fotos enviadas; la pantalla lo avisa.
+
+### Variables de entorno
+
+| Variable                                    | Por defecto | Uso                                                       |
+| ------------------------------------------- | ----------- | --------------------------------------------------------- |
+| `NUTRITION_AI_PROVIDER`                     | `simulated` | `simulated` o `gemini`                                    |
+| `GEMINI_API_KEY`                            | —           | Key de Google AI Studio. Nunca en código ni en git        |
+| `GEMINI_MODEL`                              | —           | ID exacto copiado de AI Studio, p. ej. `gemini-3.6-flash` |
+| `GEMINI_READ_TIMEOUT_SECONDS`               | `60`        | Espera máxima de Gemini, de 5 a 300                       |
+| `SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE`    | `1MB`       | Usar `5MB`                                                |
+| `SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE` | `10MB`      | Usar `6MB`                                                |
+| `NEXT_PUBLIC_NUTRITION_SOURCE` (frontend)   | `mock`      | `api` para usar este backend                              |
+
+Con `gemini` sin key o sin modelo, se usa el simulado y se registra una advertencia.
+
+### Probar con Postman
+
+1. **Authorization** → **Basic Auth** con el correo y la contraseña de una cuenta Cliente.
+2. `POST /api/nutricion/analisis` → **Body** → **form-data** → clave `foto` de tipo **File**.
+3. Con el `id` devuelto: `POST /api/nutricion/analisis/{id}/guardar`.
+4. `GET /api/nutricion/comidas`.
+
+### Test real con Gemini (opcional)
+
+Se omite si faltan las variables. La key y la foto no se guardan.
+
+```powershell
+$env:GEMINI_API_KEY = "<key>"
+$env:GEMINI_MODEL = "<modelo>"
+$env:GEMINI_TEST_PHOTO = "C:\ruta\comida.jpg"
+.\gradlew.bat test --tests "*GeminiLiveIntegrationTest" --rerun
+```
+
+### Solución de problemas
+
+| Síntoma                                                              | Solución                                                         |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| El test real se cuelga hasta el timeout tras cambiar de red o de VPN | `.\gradlew.bat --stop` y repetir                                 |
+| `503` al analizar                                                    | Ver el motivo en el log: `Análisis nutricional no disponible: …` |
+| Error al subir fotos de más de 1 MB                                  | Definir las variables `SPRING_SERVLET_MULTIPART_*`               |
 
 ## Planes oficiales
 

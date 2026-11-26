@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.imperiumcross.backend.security.DatabaseUserPrincipal;
@@ -35,7 +38,6 @@ import com.imperiumcross.backend.security.DatabaseUserPrincipal;
  * la URL ni del body.
  */
 @RestController
-@Validated
 @RequestMapping("/api/nutricion")
 public class NutritionController {
 
@@ -100,10 +102,27 @@ public class NutritionController {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problem);
     }
 
-    /** Responde directamente para que el mensaje en español llegue al frontend. */
+    /**
+     * Los errores se responden aquí mismo, sin pasar por /error, para que el código y el mensaje en
+     * español lleguen al frontend.
+     */
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ProblemDetail> handleStatus(ResponseStatusException exception) {
         return ResponseEntity.status(exception.getStatusCode()).body(exception.getBody());
+    }
+
+    @ExceptionHandler({MissingServletRequestPartException.class, MultipartException.class})
+    public ResponseEntity<ProblemDetail> handleMissingPhoto(Exception exception) {
+        return badRequest("Selecciona una foto de tu comida.");
+    }
+
+    @ExceptionHandler({HandlerMethodValidationException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ProblemDetail> handleInvalidParameter(Exception exception) {
+        return badRequest("La solicitud tiene un identificador o una fecha inválida.");
+    }
+
+    private static ResponseEntity<ProblemDetail> badRequest(String detail) {
+        return ResponseEntity.badRequest().body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail));
     }
 
     private static byte[] readPhoto(MultipartFile foto) {
