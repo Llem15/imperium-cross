@@ -20,6 +20,8 @@ import org.springframework.web.client.RestClient;
  *   <li>{@code GEMINI_API_KEY}: API key de Gemini; no tiene valor por defecto.</li>
  *   <li>{@code GEMINI_MODEL}: ID exacto del modelo copiado desde AI Studio; no tiene valor por
  *       defecto.</li>
+ *   <li>{@code GEMINI_READ_TIMEOUT_SECONDS}: espera máxima de la respuesta de Gemini, entre 5 y
+ *       300 segundos (por defecto 60).</li>
  * </ul>
  *
  * Si se pide Gemini pero falta la key o el modelo, la aplicación arranca igual con el simulado
@@ -28,7 +30,10 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class NutritionAiConfiguration {
 
-    static final Duration GEMINI_TIMEOUT = Duration.ofSeconds(30);
+    static final Duration GEMINI_CONNECT_TIMEOUT = Duration.ofSeconds(30);
+    static final Duration DEFAULT_GEMINI_READ_TIMEOUT = Duration.ofSeconds(60);
+    static final Duration MIN_GEMINI_READ_TIMEOUT = Duration.ofSeconds(5);
+    static final Duration MAX_GEMINI_READ_TIMEOUT = Duration.ofSeconds(300);
 
     private static final Logger log = LoggerFactory.getLogger(NutritionAiConfiguration.class);
 
@@ -36,8 +41,27 @@ public class NutritionAiConfiguration {
     MealRecognitionClient mealRecognitionClient(
             @Value("${NUTRITION_AI_PROVIDER:simulated}") String provider,
             @Value("${GEMINI_API_KEY:}") String apiKey,
-            @Value("${GEMINI_MODEL:}") String model) {
-        return select(provider, apiKey, model, geminiRestClientBuilder());
+            @Value("${GEMINI_MODEL:}") String model,
+            @Value("${GEMINI_READ_TIMEOUT_SECONDS:}") String readTimeoutSeconds) {
+        return select(provider, apiKey, model, geminiRestClientBuilder(readTimeout(readTimeoutSeconds)));
+    }
+
+    /** Interpreta {@code GEMINI_READ_TIMEOUT_SECONDS}; si falta o no es válido, usa 60 s. */
+    static Duration readTimeout(String seconds) {
+        if (seconds == null || seconds.isBlank()) return DEFAULT_GEMINI_READ_TIMEOUT;
+        try {
+            Duration value = Duration.ofSeconds(Long.parseLong(seconds.trim()));
+            if (value.compareTo(MIN_GEMINI_READ_TIMEOUT) >= 0 && value.compareTo(MAX_GEMINI_READ_TIMEOUT) <= 0) {
+                return value;
+            }
+        } catch (NumberFormatException ignored) {
+            // SE REGISTRA ABAJO.
+        }
+        log.warn("GEMINI_READ_TIMEOUT_SECONDS debe ser un entero entre {} y {}; se usarán {} s.",
+                MIN_GEMINI_READ_TIMEOUT.toSeconds(),
+                MAX_GEMINI_READ_TIMEOUT.toSeconds(),
+                DEFAULT_GEMINI_READ_TIMEOUT.toSeconds());
+        return DEFAULT_GEMINI_READ_TIMEOUT;
     }
 
     static MealRecognitionClient select(
@@ -75,12 +99,18 @@ public class NutritionAiConfiguration {
         return client;
     }
 
-    static RestClient.Builder geminiRestClientBuilder() {
-        HttpClient httpClient = HttpClient.newBuilder()
-                .connectTimeout(GEMINI_TIMEOUT)
-                .build();
-        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
-        requestFactory.setReadTimeout(GEMINI_TIMEOUT);
+    static RestClient.Builder geminiRestClientBuilder(Duration readTimeout) {
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(geminiHttpClient());
+        // EN EL CLIENTE HTTP DEL JDK, ESTE LÍMITE CUBRE LA ESPERA DE LA RESPUESTA COMPLETA.
+        requestFactory.setReadTimeout(readTimeout);
         return RestClient.builder().requestFactory(requestFactory);
+    }
+
+    static HttpClient geminiHttpClient() {
+        // HTTP/1.1 FORZADO POR SIMPLICIDAD; GEMINI LO ACEPTA SIN PROBLEMAS.
+        return HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(GEMINI_CONNECT_TIMEOUT)
+                .build();
     }
 }

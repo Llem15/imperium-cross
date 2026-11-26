@@ -68,9 +68,14 @@ public class NutritionService {
         int clientId = requireClientId(userId);
         repository.deletePendingAnalysesBefore(now().minus(PENDING_TTL));
 
-        String contentType = validatePhoto(photo);
+        String detectedType = validatePhoto(photo);
+        // SE GUARDA Y SE ANALIZA LA VERSIÓN REDUCIDA (1280 px, JPEG SIN EXIF). SI ImageIO NO PUEDE
+        // LEERLA (POR EJEMPLO WebP), SE USA LA ORIGINAL YA VALIDADA.
+        MealPhotoResizer.Photo prepared = MealPhotoResizer.toJpeg(photo)
+                .orElse(new MealPhotoResizer.Photo(photo, detectedType));
+
         MealRecognition recognition = MealRecognitionSanitizer.sanitize(
-                recognitionClient.recognize(photo, contentType));
+                recognitionClient.recognize(prepared.content(), prepared.contentType()));
         if (!recognition.food()) {
             throw new ResponseStatusException(UNPROCESSABLE, NOT_RECOGNIZED_MESSAGE);
         }
@@ -78,8 +83,8 @@ public class NutritionService {
         int mealId = repository.insertPendingAnalysis(new NewMeal(
                 clientId,
                 recognition,
-                photo,
-                contentType,
+                prepared.content(),
+                prepared.contentType(),
                 recognitionClient.providerName(),
                 now()));
         return repository.findMeal(clientId, mealId, MealStatus.PENDING)

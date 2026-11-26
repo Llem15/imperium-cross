@@ -13,6 +13,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +96,8 @@ class GeminiMealRecognitionClientTest {
                 .andExpect(jsonPath("$.generationConfig.responseMimeType").value("application/json"))
                 .andExpect(jsonPath("$.generationConfig.responseSchema.properties.esComida.type").value("BOOLEAN"))
                 .andExpect(jsonPath("$.generationConfig.responseSchema.required[0]").value("esComida"))
+                .andExpect(jsonPath("$.generationConfig.thinkingConfig.thinkingLevel").value("LOW"))
+                .andExpect(jsonPath("$.generationConfig.temperature").doesNotExist())
                 .andRespond(withSuccess(geminiResponse(VALID_MEAL, "STOP"), MediaType.APPLICATION_JSON));
 
         MealRecognition result = client.recognize(image, "image/jpeg");
@@ -195,6 +199,37 @@ class GeminiMealRecognitionClientTest {
         assertEquals("Gemini respondió HTTP 429", exception.getMessage());
         assertFalse(exception.getMessage().contains(TEST_KEY));
         assertNull(exception.getCause());
+    }
+
+    @Test
+    void timeoutReportsRootCauseWithoutUrlOrKey() {
+        server.expect(requestTo(ENDPOINT)).andRespond(request -> {
+            throw new SocketTimeoutException("Read timed out");
+        });
+
+        MealRecognitionUnavailableException exception = assertThrows(
+                MealRecognitionUnavailableException.class,
+                () -> client.recognize(MealPhotoValidatorTest.JPEG, "image/jpeg"));
+
+        assertEquals("No se pudo contactar a Gemini: SocketTimeoutException: Read timed out", exception.getMessage());
+        assertFalse(exception.getMessage().contains("googleapis"));
+        assertNull(exception.getCause());
+    }
+
+    @Test
+    void rootCauseDescriptionRemovesUrlsAndTheKey() {
+        Exception exception = new RuntimeException("envoltura", new IOException(
+                "fallo en https://generativelanguage.googleapis.com/v1beta/models/x:generateContent?key="
+                        + TEST_KEY + " con la key " + TEST_KEY + "\n" + "x".repeat(400)));
+
+        String description = client.describeRootCause(exception);
+
+        assertTrue(description.startsWith("IOException: fallo en [url] con la key [oculto] x"));
+        assertFalse(description.contains(TEST_KEY));
+        assertFalse(description.contains("googleapis"));
+        assertTrue(description.length() < 260);
+        assertEquals("HttpConnectTimeoutException: HTTP connect timed out",
+                client.describeRootCause(new java.net.http.HttpConnectTimeoutException("HTTP connect timed out")));
     }
 
     @Test

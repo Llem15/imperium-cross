@@ -40,11 +40,15 @@ class GeminiLiveIntegrationTest {
                 "gemini",
                 System.getenv("GEMINI_API_KEY"),
                 System.getenv("GEMINI_MODEL"),
-                NutritionAiConfiguration.geminiRestClientBuilder());
+                NutritionAiConfiguration.geminiRestClientBuilder(
+                        NutritionAiConfiguration.readTimeout(System.getenv("GEMINI_READ_TIMEOUT_SECONDS"))));
         assertInstanceOf(GeminiMealRecognitionClient.class, client, "GEMINI_MODEL no tiene un formato válido.");
 
-        // MISMA VALIDACIÓN QUE EL SERVICIO ANTES DE GUARDAR.
-        MealRecognition result = MealRecognitionSanitizer.sanitize(client.recognize(photo, contentType));
+        // MISMA PREPARACIÓN Y VALIDACIÓN QUE NutritionService.
+        MealPhotoResizer.Photo prepared = MealPhotoResizer.toJpeg(photo)
+                .orElse(new MealPhotoResizer.Photo(photo, contentType));
+        MealRecognition result = MealRecognitionSanitizer.sanitize(
+                client.recognize(prepared.content(), prepared.contentType()));
 
         assertTrue(result.food(), "Gemini no reconoció la foto como comida.");
         assertFalse(result.dishName().isBlank());

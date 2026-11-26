@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -13,6 +16,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -173,7 +179,39 @@ class NutritionServiceTest {
     }
 
     @Test
+    void storesAndSendsTheReducedJpegInsteadOfTheOriginal() throws IOException {
+        byte[] largePng = MealPhotoResizerTest.image("png", 2560, 1920, BufferedImage.TYPE_INT_RGB);
+        AtomicReference<byte[]> sentImage = new AtomicReference<>();
+        AtomicReference<String> sentType = new AtomicReference<>();
+        MealRecognitionClient recording = new MealRecognitionClient() {
+            @Override
+            public String providerName() {
+                return "test";
+            }
+
+            @Override
+            public MealRecognition recognize(byte[] image, String contentType) {
+                sentImage.set(image);
+                sentType.set(contentType);
+                return recognitionClient.recognize(image, contentType);
+            }
+        };
+        service = new NutritionService(repository, recording, clock);
+
+        int id = Integer.parseInt(service.analyze(MEMBER_USER, largePng).id());
+
+        MealPhoto stored = service.findPhoto(MEMBER_USER, id);
+        assertEquals("image/jpeg", stored.contentType());
+        assertEquals("image/jpeg", sentType.get());
+        assertArrayEquals(stored.content(), sentImage.get());
+        BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(stored.content()));
+        assertEquals(1280, decoded.getWidth());
+        assertEquals(960, decoded.getHeight());
+    }
+
+    @Test
     void returnsOwnPhotoWithDetectedContentType() {
+        // ImageIO NO LEE WebP: SE GUARDA LA ORIGINAL VALIDADA.
         int id = Integer.parseInt(service.analyze(MEMBER_USER, MealPhotoValidatorTest.WEBP).id());
 
         MealPhoto photo = service.findPhoto(MEMBER_USER, id);
