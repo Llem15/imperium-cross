@@ -1,9 +1,12 @@
+"use client";
+
 // CÓDIGO DE SECCIÓN NUTRICIONAL
 // UNA COMIDA DEL HISTORIAL; AL HACER CLIC SE SELECCIONA Y LLENA EL PANEL DE DETALLE.
 import Image from "next/image";
 import { formatAmount, formatMealDate, formatMealTime } from "./nutrients";
 import { TrashIcon } from "./nutrition-icons";
 import type { Meal } from "./nutrition-types";
+import { useMealImageSrc } from "./use-meal-image";
 
 export function MealHistoryItem({
   meal,
@@ -16,6 +19,8 @@ export function MealHistoryItem({
   onSelect: (meal: Meal) => void;
   onDelete: (meal: Meal) => void;
 }) {
+  const imageSrc = useMealImageSrc(meal.imageUrl);
+
   // SELECCIONAR Y ELIMINAR SON BOTONES HERMANOS: UN BOTÓN NO PUEDE IR DENTRO DE OTRO.
   return (
     <div
@@ -31,14 +36,18 @@ export function MealHistoryItem({
         onClick={() => onSelect(meal)}
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-4 rounded-media p-3 text-left"
       >
-        <Image
-          src={meal.imageUrl}
-          alt=""
-          width={56}
-          height={56}
-          unoptimized
-          className="size-14 shrink-0 rounded-media object-cover"
-        />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt=""
+            width={56}
+            height={56}
+            unoptimized
+            className="size-14 shrink-0 rounded-media object-cover"
+          />
+        ) : (
+          <span aria-hidden="true" className="size-14 shrink-0 rounded-media bg-dashboard-canvas" />
+        )}
         <span className="min-w-0 flex-1">
           <span className="block truncate font-bold">{meal.dishName}</span>
           <span className="mt-1 block text-caption text-muted">

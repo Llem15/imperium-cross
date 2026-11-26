@@ -1,10 +1,20 @@
 // CÓDIGO DE SECCIÓN NUTRICIONAL
-// ÚNICO PUNTO DE ACCESO A DATOS DE LA SECCIÓN. HOY SIMULA EL BACKEND EN MEMORIA;
-// PARA CONECTARLO, REEMPLAZAR EL CUERPO DE CADA FUNCIÓN POR UN fetch AL ENDPOINT REAL
-// MANTENIENDO LAS MISMAS FIRMAS Y TIPOS.
+// ÚNICO PUNTO DE ACCESO A DATOS DE LA SECCIÓN. NEXT_PUBLIC_NUTRITION_SOURCE ELIGE EL MODO:
+// "mock" (POR DEFECTO) SIMULA EL BACKEND EN MEMORIA; "api" USA /api/nutricion (nutrition-http.ts).
+// AMBOS MODOS MANTIENEN LAS MISMAS FIRMAS Y TIPOS.
 import { newDemoId } from "@/mocks/internal-data";
 import { mockDailyGoals, mockMealSamples } from "@/mocks/nutrition";
+import {
+  deleteMealRequest,
+  fetchDailyGoals,
+  fetchMeals,
+  NutritionApiError,
+  nutritionSource,
+  postMealPhoto,
+  postSaveMeal,
+} from "./nutrition-http";
 import type { DailyGoals, Meal, MealAnalysis } from "./nutrition-types";
+import { resizePhotoForUpload } from "./photo-resize";
 
 export class MealNotRecognizedError extends Error {
   constructor() {
@@ -12,6 +22,8 @@ export class MealNotRecognizedError extends Error {
     this.name = "MealNotRecognizedError";
   }
 }
+
+const useApi = nutritionSource === "api";
 
 // ESTADO SIMULADO: SE CONSERVA MIENTRAS NO SE RECARGUE LA PÁGINA.
 const savedMeals: Meal[] = [];
@@ -31,12 +43,14 @@ export function toDateKey(iso: string) {
 }
 
 export async function getDailyGoals(): Promise<DailyGoals> {
+  if (useApi) return fetchDailyGoals();
   await wait(150);
   return { ...mockDailyGoals };
 }
 
 /** Historial de comidas, de la más reciente a la más antigua. `date` usa el formato AAAA-MM-DD. */
 export async function getMeals(date?: string): Promise<Meal[]> {
+  if (useApi) return fetchMeals(date);
   await wait(150);
   return savedMeals
     .filter((meal) => !date || toDateKey(meal.savedAt) === date)
@@ -45,6 +59,18 @@ export async function getMeals(date?: string): Promise<Meal[]> {
 
 /** Sube la foto y devuelve el análisis. Lanza MealNotRecognizedError si no reconoce la comida. */
 export async function analyzeMealPhoto(file: File): Promise<MealAnalysis> {
+  if (useApi) {
+    const photo = await resizePhotoForUpload(file);
+    try {
+      return await postMealPhoto(photo, photo === file ? file.name : "foto.jpg");
+    } catch (error) {
+      if (error instanceof NutritionApiError && error.status === 422) {
+        throw new MealNotRecognizedError();
+      }
+      throw error;
+    }
+  }
+
   await wait(1800);
   // DEMO: UN ARCHIVO CON "error" EN EL NOMBRE SIMULA UNA COMIDA NO RECONOCIDA.
   if (file.name.toLowerCase().includes("error")) throw new MealNotRecognizedError();
@@ -62,6 +88,7 @@ export async function analyzeMealPhoto(file: File): Promise<MealAnalysis> {
 
 /** Guarda en el historial un análisis devuelto por analyzeMealPhoto. */
 export async function saveMeal(analysisId: string): Promise<Meal> {
+  if (useApi) return postSaveMeal(analysisId);
   await wait(400);
   const analysis = pendingAnalyses.get(analysisId);
   if (!analysis) throw new Error("El análisis ya no está disponible.");
@@ -74,6 +101,7 @@ export async function saveMeal(analysisId: string): Promise<Meal> {
 
 /** Elimina una comida del historial. */
 export async function deleteMeal(mealId: string): Promise<void> {
+  if (useApi) return deleteMealRequest(mealId);
   await wait(300);
   const index = savedMeals.findIndex((meal) => meal.id === mealId);
   if (index === -1) throw new Error("La comida ya no existe.");

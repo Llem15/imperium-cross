@@ -12,6 +12,7 @@ import { formatMealTime, nutrientInfo } from "./nutrients";
 import { NutrientCard } from "./nutrient-card";
 import { BulbIcon, ChevronLeftIcon, ImageIcon } from "./nutrition-icons";
 import type { AnalysisState, DailyGoals } from "./nutrition-types";
+import { useMealImageSrc } from "./use-meal-image";
 
 export function MealAnalysisView({
   state,
@@ -32,7 +33,9 @@ export function MealAnalysisView({
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const analysis = state.status === "success" ? state.analysis : null;
-  const imageUrl = state.status === "success" ? state.analysis.imageUrl : state.previewUrl;
+  const imageUrl = useMealImageSrc(
+    state.status === "success" ? state.analysis.imageUrl : state.previewUrl,
+  );
 
   // AL ENTRAR A LA VISTA, EL FOCO VA AL TÍTULO PARA LECTORES DE PANTALLA.
   useEffect(() => {

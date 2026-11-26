@@ -50,7 +50,9 @@ export function PhotoDropzone({ onPhotoSelected }: { onPhotoSelected: (file: Fil
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        aria-describedby={error ? "photo-error photo-hint" : "photo-hint"}
+        aria-describedby={
+          error ? "photo-error photo-hint photo-privacy" : "photo-hint photo-privacy"
+        }
         className={`flex w-full cursor-pointer flex-col items-center rounded-media border-2 border-dashed px-6 py-14 text-center max-sm:py-10 ${
           dragging
             ? "border-brand-start bg-routine-surface/40"
@@ -78,6 +80,9 @@ export function PhotoDropzone({ onPhotoSelected }: { onPhotoSelected: (file: Fil
           event.target.value = "";
         }}
       />
+      <p id="photo-privacy" className="mt-3 text-center text-caption text-muted">
+        La foto se analiza con un servicio de IA externo.
+      </p>
       {error && (
         <p id="photo-error" role="alert" className="mt-3 text-caption text-brand-start">
           {errorMessages[error]}
