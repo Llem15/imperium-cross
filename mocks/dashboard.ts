@@ -74,6 +74,8 @@ export const demoProfiles: readonly DemoProfile[] = [
       { label: "Perfil", href: "/socio/perfil" },
       { label: "Productos", href: "/socio/productos" },
       { label: "Pagos", href: "/socio/pagos" },
+      // CÓDIGO DE SECCIÓN NUTRICIONAL
+      { label: "Nutricional", href: "/socio/nutricional" },
     ],
   },
 ];
