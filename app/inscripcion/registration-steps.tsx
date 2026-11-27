@@ -83,6 +83,27 @@ function RadioMark({ selected, disabled = false }: { selected: boolean; disabled
   );
 }
 
+// Ojo abierto para mostrar; ojo tachado para ocultar
+function PasswordIcon({ visible }: { visible: boolean }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+      {visible && <path d="M3 3l18 18" />}
+    </svg>
+  );
+}
+
 function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button
@@ -105,6 +126,7 @@ type ApplicantStepProps = {
 
 export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantStepProps) {
   const hasErrors = Object.values(errors).some(Boolean);
+  const [showPassword, setShowPassword] = useState(false);
 
   function inputProps(name: keyof Applicant) {
     return {
@@ -151,6 +173,40 @@ export function ApplicantStep({ data, errors, onChange, onSubmit }: ApplicantSte
             placeholder="example@correo.com"
             maxLength={254}
           />
+        </Field>
+        <Field name="password" label="Contraseña" error={errors.password}>
+          <div className="relative">
+            <input
+              {...inputProps("password")}
+              aria-describedby={errors.password ? "password-error" : "password-hint"}
+              className={[
+                controlClasses,
+                "pr-10 max-compact:pr-10 max-small:pr-10",
+                // Oculta el ojo nativo de Edge para no mostrar dos
+                "[&::-ms-clear]:hidden [&::-ms-reveal]:hidden",
+              ].join(" ")}
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="••••••••"
+              maxLength={64}
+            />
+            <button
+              type="button"
+              aria-controls="password"
+              aria-pressed={showPassword}
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              onClick={() => setShowPassword((current) => !current)}
+              className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center
+                justify-center text-muted hover:text-ink"
+            >
+              <PasswordIcon visible={showPassword} />
+            </button>
+          </div>
+          {!errors.password && (
+            <p id="password-hint" className="text-xs text-muted">
+              Mínimo 8 caracteres, con letras y números.
+            </p>
+          )}
         </Field>
         <div data-ui="registration-row" className={rowClasses}>
           <Field name="phone" label="Teléfono" error={errors.phone}>

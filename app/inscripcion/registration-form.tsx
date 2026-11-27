@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { RegistrationConfirmation } from "./registration-confirmation";
 import { maxWeeklySessions } from "./registration-model";
 import type { PlanId } from "./registration-model";
+import { PaymentStep } from "./registration-payment";
 import { ApplicantStep, PlanPaymentStep, ScheduleStep } from "./registration-steps";
 import { linkButtonClasses } from "./registration-styles";
 import { useRegistration } from "./use-registration";
@@ -30,7 +31,12 @@ function StepProgress({ step }: { step: RegistrationStep }) {
   );
 }
 
-export function RegistrationForm({ initialPlanId }: { initialPlanId: PlanId }) {
+type RegistrationFormProps = {
+  initialPlanId: PlanId;
+  onClose: () => void;
+};
+
+export function RegistrationForm({ initialPlanId, onClose }: RegistrationFormProps) {
   const registration = useRegistration(initialPlanId);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const { step, options } = registration;
@@ -42,7 +48,14 @@ export function RegistrationForm({ initialPlanId }: { initialPlanId: PlanId }) {
   if (registration.completed) {
     return (
       <RegistrationConfirmation
-        preview={{ planId: registration.planId, method: registration.method }}
+        summary={{
+          planId: registration.planId,
+          method: registration.method,
+          schedule: registration.schedule,
+          applicantName: `${registration.data.firstName} ${registration.data.lastName}`.trim(),
+          payment: registration.payment,
+        }}
+        onClose={onClose}
       />
     );
   }
@@ -84,6 +97,19 @@ export function RegistrationForm({ initialPlanId }: { initialPlanId: PlanId }) {
           onRemove={registration.removeScheduleSession}
           onBack={() => registration.goToStep(1)}
           onSubmit={registration.confirmSchedule}
+        />
+      );
+    }
+
+    if (step === 4 && registration.method !== "cash") {
+      return (
+        <PaymentStep
+          planId={registration.planId}
+          method={registration.method}
+          schedule={registration.schedule}
+          onChangeMethod={() => registration.goToStep(3)}
+          onBack={() => registration.goToStep(3)}
+          onApproved={registration.completePayment}
         />
       );
     }

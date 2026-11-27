@@ -6,6 +6,7 @@ export type Applicant = {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   phone: string;
   dni: string;
   goal: string;
@@ -33,6 +34,7 @@ export function validateApplicant(data: Applicant): ApplicantErrors {
     /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(normalizedEmail) && !data.email.includes("..");
   const hasValidPhone = /^9\d{8}$/.test(normalizedPhone);
   const hasValidDni = /^\d{8}$/.test(data.dni);
+  const hasValidPassword = /^(?=.*\p{L})(?=.*\d).{8,64}$/u.test(data.password);
   const hasValidGoal = (trainingGoals as readonly string[]).includes(data.goal);
 
   if (!data.firstName.trim()) {
@@ -43,6 +45,9 @@ export function validateApplicant(data: Applicant): ApplicantErrors {
   }
   if (!hasValidEmail) {
     errors.email = "Completa este campo con un correo válido.";
+  }
+  if (!hasValidPassword) {
+    errors.password = "Usa al menos 8 caracteres, con letras y números.";
   }
   if (!hasValidPhone) {
     errors.phone = "Completa este campo con 9 dígitos, empezando en 9.";
@@ -131,14 +136,11 @@ export function planForSessions(current: PlanId, sessionsByPlan: PlanSessions, c
   return cheapest?.id ?? current;
 }
 
-// Estado visual del prototipo
-export type RegistrationPreview = {
-  planId: PlanId;
-  method: PaymentMethod;
-};
+// La membresía dura 30 días desde hoy; devuelve "DD/MM/AAAA"
+export const membershipDays = 30;
 
-// Valores de referencia
-export const confirmationExample = {
-  validUntil: "08/10/2026",
-  attendanceCode: "#4821",
-} as const;
+export function membershipEndDate(today = new Date()) {
+  const end = new Date(today);
+  end.setDate(end.getDate() + membershipDays);
+  return end.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
+}

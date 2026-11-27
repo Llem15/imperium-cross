@@ -154,7 +154,13 @@ export function PlanRegistration() {
         >
           ×
         </button>
-        {selectedPlan && <RegistrationForm key={selectedPlan} initialPlanId={selectedPlan} />}
+        {selectedPlan && (
+          <RegistrationForm
+            key={selectedPlan}
+            initialPlanId={selectedPlan}
+            onClose={closeRegistration}
+          />
+        )}
       </dialog>
     </>
   );

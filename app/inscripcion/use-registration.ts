@@ -21,6 +21,7 @@ import type {
   Weekday,
   WeeklySchedule,
 } from "./registration-model";
+import type { PaymentResult } from "./registration-payment-model";
 
 export type RegistrationStep = 1 | 2 | 3 | 4;
 
@@ -30,6 +31,7 @@ export function useRegistration(initialPlanId: PlanId) {
     firstName: "",
     lastName: "",
     email: "",
+    password: "",
     phone: "",
     dni: "",
     goal: "",
@@ -42,6 +44,7 @@ export function useRegistration(initialPlanId: PlanId) {
   const [planId, setPlanId] = useState<PlanId>(initialPlanId);
   const [planNotice, setPlanNotice] = useState<string | null>(null);
   const [method, setMethod] = useState<PaymentMethod>("card");
+  const [payment, setPayment] = useState<PaymentResult | null>(null);
   const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
@@ -77,7 +80,9 @@ export function useRegistration(initialPlanId: PlanId) {
           ? value.replace(/\D/g, "").slice(0, 9)
           : name === "dni"
             ? value.replace(/\D/g, "").slice(0, 8)
-            : value;
+            : name === "password"
+              ? value.slice(0, 64)
+              : value;
     setData((current) => ({ ...current, [name]: clean }));
     setErrors((current) => ({ ...current, [name]: undefined }));
   }
@@ -126,9 +131,20 @@ export function useRegistration(initialPlanId: PlanId) {
     setPlanNotice(null);
   }
 
+  // Efectivo no pasa por la pasarela
   function continueRegistration(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // Solo cambia la vista local
+    if (method === "cash") {
+      // Solo cambia la vista local
+      setCompleted(true);
+    } else {
+      setStep(4);
+    }
+  }
+
+  // Solo llega el resultado: método, número de operación y últimos 4 dígitos
+  function completePayment(result: PaymentResult) {
+    setPayment(result);
     setCompleted(true);
   }
 
@@ -146,6 +162,7 @@ export function useRegistration(initialPlanId: PlanId) {
     planId,
     planNotice,
     method,
+    payment,
     completed,
     updateField,
     nextStep,
@@ -156,6 +173,7 @@ export function useRegistration(initialPlanId: PlanId) {
     selectPlan,
     setMethod,
     continueRegistration,
+    completePayment,
     goToStep,
   };
 }
