@@ -1,12 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { validateApplicant } from "./registration-model";
-import type { Applicant, ApplicantErrors, PaymentMethod, PlanId } from "./registration-model";
+import { plans } from "../landing-content";
+import { getAvailableSessions, getWeeklySessionsByPlan } from "./registration-data";
+import {
+  planForSessions,
+  removeSession,
+  scheduledSessions,
+  sessionsLabel,
+  toggleSession,
+  validateApplicant,
+} from "./registration-model";
+import type {
+  Applicant,
+  ApplicantErrors,
+  PaymentMethod,
+  PlanId,
+  RegistrationOptions,
+  Weekday,
+  WeeklySchedule,
+} from "./registration-model";
+
+export type RegistrationStep = 1 | 2 | 3 | 4;
 
 export function useRegistration(initialPlanId: PlanId) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<RegistrationStep>(1);
   const [data, setData] = useState<Applicant>({
     firstName: "",
     lastName: "",
@@ -16,9 +35,35 @@ export function useRegistration(initialPlanId: PlanId) {
     goal: "",
   });
   const [errors, setErrors] = useState<ApplicantErrors>({});
+  const [schedule, setSchedule] = useState<WeeklySchedule>({});
+  const [options, setOptions] = useState<RegistrationOptions | null>(null);
+  const [optionsFailed, setOptionsFailed] = useState(false);
+  const [optionsRequest, setOptionsRequest] = useState(0);
   const [planId, setPlanId] = useState<PlanId>(initialPlanId);
+  const [planNotice, setPlanNotice] = useState<string | null>(null);
   const [method, setMethod] = useState<PaymentMethod>("card");
   const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([getAvailableSessions(), getWeeklySessionsByPlan()])
+      .then(([availability, sessionsByPlan]) => {
+        if (active) setOptions({ availability, sessionsByPlan });
+      })
+      .catch(() => {
+        if (active) setOptionsFailed(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [optionsRequest]);
+
+  function retryOptions() {
+    setOptionsFailed(false);
+    setOptionsRequest((current) => current + 1);
+  }
 
   function updateField(name: keyof Applicant, value: string) {
     const clean =
@@ -52,28 +97,65 @@ export function useRegistration(initialPlanId: PlanId) {
     setStep(2);
   }
 
+  function toggleScheduleSession(day: Weekday, start: string) {
+    setSchedule((current) => toggleSession(current, day, start));
+  }
+
+  function removeScheduleSession(day: Weekday) {
+    setSchedule((current) => removeSession(current, day));
+  }
+
+  function confirmSchedule(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const count = scheduledSessions(schedule).length;
+    if (!options || count === 0) return;
+
+    const nextPlanId = planForSessions(planId, options.sessionsByPlan, count);
+    const nextPlan = plans.find((plan) => plan.id === nextPlanId);
+    setPlanNotice(
+      nextPlanId !== planId && nextPlan
+        ? `Cambiamos a ${nextPlan.name} porque elegiste ${sessionsLabel(count)}.`
+        : null,
+    );
+    setPlanId(nextPlanId);
+    setStep(3);
+  }
+
+  function selectPlan(nextPlanId: PlanId) {
+    setPlanId(nextPlanId);
+    setPlanNotice(null);
+  }
+
   function continueRegistration(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     // Solo cambia la vista local
     setCompleted(true);
   }
 
-  function previousStep() {
-    setStep(1);
+  function goToStep(nextStep: RegistrationStep) {
+    setStep(nextStep);
   }
 
   return {
     step,
     data,
     errors,
+    schedule,
+    options,
+    optionsFailed,
     planId,
+    planNotice,
     method,
     completed,
     updateField,
     nextStep,
-    previousStep,
-    continueRegistration,
-    setPlanId,
+    retryOptions,
+    toggleScheduleSession,
+    removeScheduleSession,
+    confirmSchedule,
+    selectPlan,
     setMethod,
+    continueRegistration,
+    goToStep,
   };
 }

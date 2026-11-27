@@ -57,6 +57,80 @@ export function validateApplicant(data: Applicant): ApplicantErrors {
   return errors;
 }
 
+export const weekdays = [
+  { id: 1, short: "Lun", name: "lunes" },
+  { id: 2, short: "Mar", name: "martes" },
+  { id: 3, short: "Mié", name: "miércoles" },
+  { id: 4, short: "Jue", name: "jueves" },
+  { id: 5, short: "Vie", name: "viernes" },
+] as const;
+
+export type Weekday = (typeof weekdays)[number]["id"];
+// Horas de inicio ("HH:MM") con cupo por día
+export type WeeklyAvailability = Record<Weekday, readonly string[]>;
+// Una hora de inicio como máximo por día
+export type WeeklySchedule = Partial<Record<Weekday, string>>;
+export type PlanSessions = Record<PlanId, number>;
+export type RegistrationOptions = {
+  availability: WeeklyAvailability;
+  sessionsByPlan: PlanSessions;
+};
+
+// Las sesiones duran 60 minutos
+export function sessionEnd(start: string) {
+  const [hours, minutes] = start.split(":");
+  return `${String(Number(hours) + 1).padStart(2, "0")}:${minutes}`;
+}
+
+export function formatSession(start: string) {
+  return `${start} – ${sessionEnd(start)}`;
+}
+
+export function sessionsLabel(count: number) {
+  return count === 1 ? "1 sesión" : `${count} sesiones`;
+}
+
+export function scheduledSessions(schedule: WeeklySchedule) {
+  return weekdays.flatMap((day) => {
+    const start = schedule[day.id];
+    return start ? [{ day, start }] : [];
+  });
+}
+
+// Elegir otra hora del mismo día la reemplaza; elegir la misma la quita.
+export function toggleSession(schedule: WeeklySchedule, day: Weekday, start: string) {
+  if (schedule[day] === start) return removeSession(schedule, day);
+  return { ...schedule, [day]: start };
+}
+
+export function removeSession(schedule: WeeklySchedule, day: Weekday) {
+  const next = { ...schedule };
+  delete next[day];
+  return next;
+}
+
+export function maxWeeklySessions(sessionsByPlan: PlanSessions) {
+  return Math.max(...Object.values(sessionsByPlan));
+}
+
+export function canScheduleDay(schedule: WeeklySchedule, day: Weekday, limit: number) {
+  return Boolean(schedule[day]) || scheduledSessions(schedule).length < limit;
+}
+
+export function planCoversSessions(sessionsByPlan: PlanSessions, planId: PlanId, count: number) {
+  return sessionsByPlan[planId] >= count;
+}
+
+// Conserva el plan si cubre las sesiones; si no, usa el más barato que sí las cubra.
+export function planForSessions(current: PlanId, sessionsByPlan: PlanSessions, count: number) {
+  if (planCoversSessions(sessionsByPlan, current, count)) return current;
+
+  const cheapest = plans
+    .filter((plan) => planCoversSessions(sessionsByPlan, plan.id, count))
+    .sort((first, second) => Number(first.price) - Number(second.price))[0];
+  return cheapest?.id ?? current;
+}
+
 // Estado visual del prototipo
 export type RegistrationPreview = {
   planId: PlanId;
